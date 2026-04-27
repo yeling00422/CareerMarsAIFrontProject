@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",                // 编译目标（保持最新 ES 特性）
+    "useDefineForClassFields": true,   // 类字段使用 defineProperty
+    "module": "ESNext",                // 模块规范（ES 模块）
+    "moduleResolution": "Node",        // 模块解析方式（Node 风格）
+    "strict": true,                    // 开启严格类型检查（必开，避免隐式 any）
+    "jsx": "preserve",                 // JSX 处理（Vue 中用 preserve）
+    "resolveJsonModule": true,         // 允许导入 JSON 模块
+    "isolatedModules": true,           // 每个文件单独编译（Vite 推荐）
+    "esModuleInterop": true,           // 兼容 CommonJS 模块（如 axios）
+    "lib": ["ESNext", "DOM"],          // 引入的库（ESNext + DOM 类型）
+    "skipLibCheck": true,              // 跳过库的类型检查（加快编译）
+    "noEmit": true,                    // 不输出编译后的文件（Vite 用自身打包）
+    "baseUrl": ".",                    // 基础路径（配合 paths 用）
+    "paths": {                         // 路径别名配置（让 @ 指向 src）
+      "@/*": ["src/*"]
+    }
+  },
+  "include": [                        // 需要编译的文件范围
+    "src/**/*.ts", 
+    "src/**/*.d.ts", 
+    "src/**/*.tsx", 
+    "src/**/*.vue"
+  ],
+  "exclude": [                        // 排除不需要编译的文件
+    "node_modules"
+  ]
+}

@@ -1,0 +1,504 @@
+<template>
+  <div class="home-container">
+    <!-- 顶部固定栏 -->
+    <div class="head-container">
+      <img src="../assets/img/上面固定栏.png" class="logo" alt="CareerMars"/>
+    </div>
+    
+    <div class="test-paper-name">{{ testPaperName }}</div>
+
+    <!-- 问题编号 -->
+    <div class="question-number">问题 {{ currentPage }} / {{ totalPages }}</div>
+    
+    <!-- 问题内容 -->
+    <div class="question-card">
+      ({{ getCurrentQuestionTypeText() }}) 
+      <br>
+      {{ getCurrentQuestionTitle() }}
+    </div>
+    
+    <!-- 选项/输入区域 -->
+    <div class="options-container">
+      <!-- 单选题 / 多选题 / 判断题：选项列表 -->
+      <div v-if="getCurrentQuestionType() !== 4">
+        <div 
+          v-for="(option, index) in getCurrentQuestionOptions()" 
+          :key="index"
+          :class="getOptionClass(option.option)"
+          @click="selectOption(option.option)"
+        >
+          <div class="option-letter">{{ option.option }}</div>
+          <div class="option-content">{{ option.text }}</div>
+        </div>
+      </div>
+
+      <!-- 填空题：输入框 -->
+      <div v-else-if="getCurrentQuestionType() === 4">
+        <input 
+          v-model="userFreeTextAnswer"
+          type="text" 
+          class="free-text-input"
+          placeholder="请输入您的答案..."
+          @input="saveUserAnswer"
+        />
+      </div>
+    </div>
+
+    <!-- 提示文字 -->
+    <div class="tip-text" :class="{ hidden: hasUserAnswered() }">
+      {{ getCurrentQuestionType() === 4 ? '提示：请输入正确的答案' : '提示：请选择正确的答案' }}
+    </div>
+
+    <!-- 按钮区域 -->
+    <div class="button-section">
+      <!-- 上一题 -->
+      <button 
+        v-if="currentPage > 1"
+        class="nav-btn prev-btn" 
+        @click="lastQuestion"
+      >
+        上一题
+      </button>
+
+      <!-- 下一题 / 提交 -->
+      <button 
+        class="nav-btn next-btn" 
+        @click="nextQuestion"
+      >
+        {{ currentPage !== totalPages ? '下一题' : '提交' }}
+      </button>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'AuditQuestion',
+  data() {
+    return {
+      selectedOption: null,
+      selectedOptions: [],
+      userFreeTextAnswer: '',
+      currentPage: 1,
+      userAnswers: [],
+      expectationPosition: '',
+      resume: '',
+      testPaperName: '',
+      questions: [],
+      interviewScore: 0,
+    }
+  },
+  computed: {
+    totalPages() {
+      return this.questions.length;
+    },
+    scorePerQuestion() {
+      return 100 / this.totalPages;
+    }
+  },
+  created() {
+    this.loadQuestionData();
+  },
+  methods: {
+    loadQuestionData() {
+      const generateQuestion = this.$route.query.generateQuestion;
+      this.expectationPosition = this.$route.query.expectationPosition;
+      this.resume = this.$route.query.resume;
+      this.testPaperName = this.$route.query.testPaperName;
+
+      console.log("test-question-generateQuestion:", generateQuestion);
+      console.log("test-question-expectationPosition:", this.expectationPosition);
+      console.log("test-question-resume:", this.resume);
+      console.log("test-question-testPaperName:", this.testPaperName);
+      if(this.testPaperName == null){
+        this.testPaperName = this.expectationPosition+"-模拟笔试题";
+        console.log("test-question-testPaperName2:", this.testPaperName);
+      }
+
+      if (generateQuestion) {
+        try {
+          const parsedData = JSON.parse(generateQuestion);
+          // ✅ 使用兼容性写法，不使用可选链
+          this.questions = Array.isArray(parsedData) ? parsedData : (parsedData && parsedData.questions ? parsedData.questions : []);
+          console.log("questions:", this.questions);
+          console.log("题目数量:", this.questions.length);
+        } catch (error) {
+          console.error('解析题目数据失败:', error);
+          alert('数据加载失败，请重新尝试');
+          this.$router.push('/');
+        }
+      } else {
+        alert('未找到匹配数据，请重新分析');
+        this.$router.push('/');
+      }
+    },
+
+    getCurrentQuestionTitle() {
+      const q = this.getCurrentQuestion();
+      return q ? q.title : '';
+    },
+
+    getCurrentQuestionType() {
+      const q = this.getCurrentQuestion();
+      return q ? q.type : 0;
+    },
+
+    getCurrentQuestionTypeText() {
+      const type = this.getCurrentQuestionType();
+      const typeMap = {
+        1: '单选题',
+        2: '多选题',
+        3: '判断题',
+        4: '填空题',
+        5: '性格测试题'
+      };
+      return typeMap[type] || '未知题型';
+    },
+
+    getCurrentQuestionOptions() {
+      const q = this.getCurrentQuestion();
+      return q ? q.options || [] : [];
+    },
+
+    getCurrentQuestion() {
+      return this.questions[this.currentPage - 1];
+    },
+
+    getOptionClass(optionValue) {
+      return [
+        'option',
+        { 
+          selected: this.isOptionSelected(optionValue)
+        }
+      ];
+    },
+
+    isOptionSelected(optionValue) {
+      if (this.getCurrentQuestionType() === 2) {
+        return this.selectedOptions.includes(optionValue);
+      } else {
+        return this.selectedOption === optionValue;
+      }
+    },
+
+    selectOption(optionValue) {
+      const type = this.getCurrentQuestionType();
+
+      if (type === 2) {
+        const idx = this.selectedOptions.indexOf(optionValue);
+        if (idx > -1) {
+          this.selectedOptions.splice(idx, 1);
+        } else {
+          this.selectedOptions.push(optionValue);
+        }
+      } else {
+        this.selectedOption = this.selectedOption === optionValue ? null : optionValue;
+      }
+
+      this.saveUserAnswer();
+    },
+
+    saveUserAnswer() {
+      const type = this.getCurrentQuestionType();
+      let answer = null;
+
+      if (type === 4) {
+        answer = this.userFreeTextAnswer;
+      } else if (type === 2) {
+        answer = [...this.selectedOptions].sort();
+      } else {
+        answer = this.selectedOption;
+      }
+
+      while (this.userAnswers.length < this.currentPage) {
+        this.userAnswers.push(null);
+      }
+      this.userAnswers[this.currentPage - 1] = answer;
+    },
+
+    hasUserAnswered() {
+      const type = this.getCurrentQuestionType();
+      const answer = this.userAnswers[this.currentPage - 1];
+
+      if (type === 4) {
+        return !!this.userFreeTextAnswer && this.userFreeTextAnswer.trim() !== '';
+      } else if (type === 2) {
+        return this.selectedOptions && this.selectedOptions.length > 0;
+      } else {
+        return this.selectedOption !== null;
+      }
+    },
+
+    checkMultipleChoiceAnswer(userAnswer, correctAnswer) {
+      if (!userAnswer || !correctAnswer) return false;
+      
+      // 如果 correctAnswer 是字符串，按逗号分割成数组
+      const correctArray = typeof correctAnswer === 'string' 
+        ? correctAnswer.split(',') 
+        : correctAnswer;
+      const userSorted = [...userAnswer].sort().join(',');
+      const correctSorted = [...correctArray].sort().join(',');
+      
+      return userSorted === correctSorted;
+    },
+
+    calculateTotalScore() {
+      let totalScore = 0;
+      
+      this.questions.forEach((question, index) => {
+        const userAnswer = this.userAnswers[index];
+        const correctAnswer = question.answer;
+        const type = question.type;
+        
+        if (type === 5) {
+          totalScore += this.scorePerQuestion;
+          return;
+        }
+        
+        let isCorrect = false;
+        
+        if (type === 2) {
+          isCorrect = this.checkMultipleChoiceAnswer(userAnswer, correctAnswer);
+        }else if (type === 3) {
+          // 判断题：将用户选择的 A/B 转换为 "正确"/"错误" 再比较
+          const judgeMap = {
+            'A': '正确',
+            'B': '错误'
+          };
+          const userJudge = judgeMap[userAnswer];
+          isCorrect = userJudge === correctAnswer;
+        } else {
+          // console.log(`填空题比较: userAnswer="${userAnswer}", correctAnswer="${correctAnswer}"`);
+          // console.log(`是否相等: ${userAnswer === correctAnswer}`);
+          isCorrect = userAnswer === correctAnswer;
+        }
+        
+        if (isCorrect) {
+          totalScore += this.scorePerQuestion;
+        }
+      });
+      
+      return Math.floor(totalScore);
+    },
+
+    lastQuestion() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.resetCurrentAnswer();
+      }
+    },
+
+    nextQuestion() {
+      if (!this.hasUserAnswered()) {
+        alert('请先完成当前题目');
+        return;
+      }
+
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+        this.resetCurrentAnswer();
+      } else {
+
+
+        this.interviewScore = this.calculateTotalScore();
+        console.log('提交所有答案:', {
+          expectationPosition: this.expectationPosition,
+          interviewScore: this.interviewScore,
+          resume: this.resume
+        });
+        this.$router.push({
+          path: '/analysis-question',
+          query: { 
+            expectationPosition: this.expectationPosition,
+            resume: this.resume,
+            interviewScore: this.interviewScore
+          }
+        });
+      }
+    },
+
+    resetCurrentAnswer() {
+      this.selectedOption = null;
+      this.selectedOptions = [];
+      this.userFreeTextAnswer = '';
+      this.saveUserAnswer();
+    }
+  }
+}
+</script>
+
+<style scoped>
+.home-container {
+  width: 100vw;
+  min-height: 100vh;
+  height: auto;
+  background-image: url('../assets/img/第一页白背景.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.head-container {
+  height: 10rem;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.question-number {
+  text-align: center;
+  color: #333;
+  padding-top: 5rem;
+  padding-bottom: 4rem;
+  font-size: 5rem;
+  font-weight: bold;
+  background-color: white;
+}
+
+.question-card {
+  background-color: #444852;
+  color: white;
+  margin: 0 5rem 5rem;
+  padding: 5rem;
+  border-radius: 4rem;
+  font-size: 3.5rem;
+  line-height: 1.5;
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 5rem;
+}
+
+.options-container {
+  flex: 1;
+  padding: 0 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  margin-bottom: 3rem;
+  padding-bottom: 5rem;
+}
+
+.option {
+  background-color: #999;
+  border-radius: 2rem;
+  padding: 0;
+  color: white;
+  font-size: 3rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: auto;
+  min-height: 0;
+  border: 1rem solid transparent;
+  margin-bottom: 3rem;
+}
+
+.option:hover {
+  background-color: #888;
+}
+
+.option.selected {
+  border-color: #00F5D4;
+}
+
+.option-letter {
+  width: 6rem;
+  height: 6rem;
+  background-color: #666;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2.5rem;
+  margin-right: 2.5rem;
+  font-weight: bold;
+  flex-shrink: 0;
+  font-size: 4rem;
+}
+
+.option.selected .option-letter {
+  color: #666;
+  background-color: #00F5D4;
+}
+
+.option-content {
+  flex: 1;
+  line-height: 1.8;
+  word-break: break-word;
+  padding: 3.5rem 0;
+}
+
+.tip-text {
+  text-align: center;
+  color: #999;
+  font-size: 3rem;
+}
+
+.button-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 5rem 5rem 10rem;
+}
+
+.nav-btn {
+  font-size: 4rem;
+  padding: 2rem 5rem;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  margin: 5rem;
+  transition: all 0.3s;
+}
+
+.prev-btn {
+  background: #aaa;
+  color: white;
+}
+
+.next-btn {
+  background: #00F5D4;
+  color: #333;
+}
+
+.hidden {
+  opacity: 0;
+  visibility: hidden;
+  height: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.free-text-input {
+  width: 92%;
+  padding: 3rem;
+  font-size: 3rem;
+  border: 2px solid #ccc;
+  border-radius: 2rem;
+  margin-top: 2rem;
+  background: #fff;
+  color: #333;
+}
+
+.test-paper-name {
+  text-align: center;
+  color: #999;
+  font-size: 6rem;
+  font-weight: bold;
+
+  width: 60rem;
+  height: auto;
+  margin: 5rem auto 0;
+  border-radius: 2rem;
+  background-color: #00F5D4;
+}
+</style>

@@ -1,0 +1,554 @@
+<template>
+  <div class="home-container">
+    <!-- 顶部固定栏 -->
+    <div class="head-container">
+      <img src="../assets/img/上面固定栏.png" class="logo" alt="CareerMars"/>
+    </div>
+
+    <!-- 报告标题 -->
+    <div class="report-title">
+      <p class="head-text">你的职业准备度分析</p>
+      <p class="head-next-text">基于简历、岗位匹配和面试表现的综合评估</p>
+    </div>
+
+    <div class="middle-container">
+      <!-- 综合评分 -->
+      <div class="main-score">
+        <!-- ★★ 修改1：给svg加上【正确的viewBox】，这是尺寸一致的核心，永不断裂 -->
+        <svg class="progress-ring" viewBox="0 0 100 100">
+          <circle class="progress-ringbackground"/>
+          <circle class="progress-ringcircle" :stroke-dasharray="circumference" :stroke-dashoffset="strokeDashoffset"/>
+        </svg>
+        <p class="score-label">综合评分</p>
+        <p class="score-number"><span class="main-number">{{ avgScore }}</span>%</p>
+      </div>
+      <!-- 三个小矩形框 -->
+      <div class="mini-scores">
+        <div class="mini-score-item">
+          <span class="iconfont icon-qiyewenhua"></span>
+          <div class="mini-score-value">{{ educationalScore }}%</div>
+          <div class="mini-score-label">文化契合度</div>
+
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: this.educationalScore + '%' }"></div>
+          </div>
+        </div>
+        <div class="mini-score-item">
+          <span class="iconfont icon-gongju"></span>
+          <div class="mini-score-value">{{resumeMatchingScore }}%</div>
+          <div class="mini-score-label">技能匹配度</div>
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: resumeMatchingScore + '%' }"></div>
+          </div>
+        </div>
+        <div class="mini-score-item">
+          <span class="iconfont icon-ceshishenqing"></span>
+          <div class="mini-score-value">{{interviewScore }}%</div>
+          <div class="mini-score-label">面试表现</div>
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width:interviewScore + '%' }"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 综合表现对比 -->
+      <div class="comparison-section">
+        <p class="comparison-text">你的综合表现超过了<span class="comparison-text-span">{{ avgScore }}%</span>的同类候选人</p>
+      </div>
+
+      <!-- 提升空间 -->
+      <div class="improvement-section">
+        <div class="improvement-title">你的提升空间<span class="iconfont icon-gongju icon-upgrade"></span></div>
+        <div class="end-box" v-for="(improvement, index) in improvements" :key="index">
+          <span class="end-title">{{ improvement.title }}</span>
+          <div class="end-text">{{ improvement.description }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="button-section">
+      <button class="free-analysis-btn" @click=goNext>登录后查看详情</button>
+      <span class="iconfont icon-denglu"></span>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+import { getAiURL } from '@/utils/index';
+
+const api = axios.create({
+  baseURL: getAiURL(),
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// 请求拦截器添加token
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default {
+  name: 'CareerReadinessReport',
+  data() {
+    return {
+      expectationPosition: '',  // 期望岗位
+      resume: '',  // 简历
+
+      avgScore: 0,// 综合评分50
+      educationalScore:0, // 教育背景分0
+      resumeMatchingScore: 0,  // 技能匹配度
+      interviewScore: 0,  // 面试表现分80
+      overallPerformance: 0,  // 综合表现：超越了36%的同类候选人
+      improvements: [],
+      analysisResultData: null,
+    }
+  },
+  computed: {
+    // 计算圆的周长
+    circumference() {
+      // ★★ 修改2：半径改成 40 ，和下面css里的r:40 完全对应，周长公式正确
+      const radius = 40; 
+      return Math.PI * radius * 2;
+    },
+    // 计算前景圆的偏移量，实现进度效果
+    strokeDashoffset() {
+      // ★★ 修改3：致命错误修复！不要直接修改this.score（会污染data原数据），用临时变量！
+      // let currentScore = this.score;
+      // if (this.avgScore > 100) {
+      //   this.avgScore = 100;
+      // } else if (this.avgScore < 0) {
+      //   this.avgScore = 0;
+      // }
+      // currentScore = currentScore > 100 ? 100 : currentScore < 0 ? 0 : currentScore;
+      const progress = this.avgScore / 100;
+      const offset = this.circumference * (1 - progress);
+      return offset;
+    }
+  },
+  created() {
+    // 组件创建时自动加载数据
+    this.loadAnalysisData();
+  },
+  methods: {
+    loadAnalysisData() {
+      // 从路由参数中获取数据
+      this.interviewScore = Number(this.$route.query.interviewScore);
+      this.analysisResultData = this.$route.query.analysisResultData;
+      this.resume = this.$route.query.resume;// 将数据转为字符串传递
+      this.expectationPosition = this.$route.query.expectationPosition;// 将数据转为字符串传递
+      // const resume = this.$route.query.resume;// 将数据转为字符串传递
+      console.log("analysis-result-interviewScore:",this.interviewScore);
+      console.log("analysis-result-analysisResultData:",this.analysisResultData);
+      console.log("analysis-result-resume:",this.resume);
+      console.log("analysis-result-expectationPosition:",this.expectationPosition);
+      const educationalQualifications = this.resume.educationalQualifications;
+      if(educationalQualifications==="博士"){
+        this.educationalScore = 100;
+      } else if(educationalQualifications==="硕士"){
+        this.educationalScore = 80;
+      } else if(educationalQualifications==="本科"){
+        this.educationalScore = 60;
+      } else if(educationalQualifications==="专科"){
+        this.educationalScore = 40;
+      } else {
+        this.educationalScore = 20;
+      }
+      console.log("educationalQualifications:", educationalQualifications);
+      // 新增：解析接口返回的JSON数据
+      if (this.analysisResultData) {
+        try {
+          const resultData = JSON.parse(this.analysisResultData);
+          console.log("解析后的数据:", resultData);
+          
+          // 赋值给对应的字段
+          this.resumeMatchingScore = resultData.resumeMatchingScore;
+          this.overallPerformance = resultData.overallPerformance;
+          this.improvements = resultData.improvements;
+          this.avgScore = Math.trunc((this.educationalScore + this.resumeMatchingScore + this.interviewScore) / 3);
+          console.log("avgScore:", this.avgScore);
+          console.log("educationalScore:", this.educationalScore);
+          console.log("resumeMatchingScore:", this.resumeMatchingScore);
+          console.log("interviewScore:", this.interviewScore);
+          console.log("overallPerformance:", this.overallPerformance);
+          console.log("improvements:", this.improvements);
+        } catch (error) {
+          console.error("解析analysisResultData失败:", error);
+        }
+      }
+    },
+    async goNext() {
+      // try {
+        // const API_PATH = "/ai/recommendation/mentor";
+
+        // const data = {
+        //   resume: this.resume,
+        //   expectationPosition: this.expectationPosition,
+        // }
+
+      this.$router.push({
+        path: '/login-by-phone-password',
+        query: { 
+          analysisResultData: this.analysisResultData,
+          interviewScore: this.interviewScore,
+          expectationPosition: this.expectationPosition, 
+          resume: this.resume
+        },
+      });
+        // const response = await api.post(API_PATH,data);
+        // console.log("接口调用成功，返回的数据是：", response);
+
+        // 处理后端返回的Result结构
+        // const result = response.data;
+        // console.log("result：", result);
+        // console.log("result.code:", result.code);
+        // console.log("result.data：", result.data);
+
+        
+        // if (result.code === 200 || result.code === 0) {
+        //   this.$router.push({
+        //     path: '/end-load',
+        //     query: { 
+        //       teachers: JSON.stringify(result.data.mentorList)
+        //     },
+        //   });
+        // } else {
+        //   console.error("接口返回错误:", result.msg);
+        //   alert(result.msg || '匹配岗位失败');
+        // }
+      // } catch (error) {
+      //   console.error("接口调用失败，错误信息是：", error);
+      // }
+    }
+  }
+}
+</script>
+
+<style scoped>
+.home-container {
+  width: 100vw;
+  min-height: 100vh;
+  height: auto;
+  background-image: url('../assets/img/第一页白背景.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.home-container::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 86rem;
+  width: 100%;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom, 
+    rgba(189, 31, 31, 0),  
+    rgba(0, 0, 0, 0.8)  
+  );
+  backdrop-filter: blur(2.5px); /* 模糊程度：2px，可调整 */
+  z-index: 1; 
+}
+
+
+.head-container {
+  height: 10rem;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.report-title {
+  text-align: center;
+  margin-top: -5rem;
+  margin-bottom: 10rem;
+}
+
+.head-text {
+  color: #000000;
+  font-size: 8rem;
+  font-weight: 1000;
+}
+
+.head-next-text {
+  color: #666;
+  font-size: 3rem;
+  margin-top: -8rem;
+}
+
+.middle-container{
+  position: relative;
+  top: -7rem;
+  left: 0rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
+  height: auto;
+  min-height: 120rem;
+  margin: auto;
+  border-radius: 5rem;
+  background-color: #E9E9E9;
+}
+
+.progress-ring{
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+}
+
+.progress-ringbackground{
+  stroke:#e6e6e6;
+  stroke-width:1rem;
+  fill:transparent;
+  r:40;
+  cx:50;
+  cy:50;
+}
+
+.progress-ringcircle{
+  stroke:#00F5D4;
+  stroke-width:1rem;
+  fill:transparent;
+  r:40;
+  cx:50;
+  cy:50;
+  transform-origin: 50% 50%;
+  transform: rotate(-90deg);
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.main-score {
+  position: relative;
+  top:3rem;
+  height: 30rem;
+  width: 90%;
+  max-width: 80rem;
+  background-color: #646464;
+	border-radius: 5rem;
+	border: #00F5D4 solid 0.5rem;
+	box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-label {
+  position: absolute;
+  font-size: 3rem;
+  color: #fff;
+  top: 4rem;
+}
+
+.score-number {
+  position: absolute;
+  font-size: 4rem;
+  color: #00F5D4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  top: -2rem;
+}
+
+.main-number{
+  font-size: 10rem;
+  font-weight: bold;
+  color: #00F5D4;
+}
+
+.mini-scores {
+  display: flex;
+  justify-content: space-around;
+  position: relative;
+  gap: 2rem;
+  width: 90%;
+  max-width: 80rem;
+  height: 15rem;
+  margin: auto;
+  top: 6rem;
+}
+
+.mini-score-item {
+  background: #9E9E9E;
+  padding: 2rem;
+  border-radius: 2rem;
+  border: #00F5D4 solid 0.5rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+}
+
+.mini-score-value {
+  position: relative;
+  font-size: 4rem;
+	font-weight: bold;
+	color: #00F5D4;
+	margin-bottom: 0.5rem;
+	top: -9rem;
+  left: 10rem;
+}
+
+.mini-score-label {
+ 	position: relative;
+	top: -10rem;
+	left: 9rem;
+	font-size: 2.5rem;
+	color: #F2F2F2
+}
+
+.progress-bar{
+  position: relative;
+	height: 1rem;
+	width: 20rem;
+	top: -8.5rem;
+	/* right: -1rem; */
+  left: 1rem;
+	background-color: #e0e0e0;;
+	border-radius: 0.5rem;
+	overflow: hidden;
+}
+
+.progress-fill {
+  
+	height: 100%;
+	background-color: #00F5D4;
+	border-radius: 0.5rem;
+}
+
+.iconfont{
+  position: relative;
+	font-size: 8rem;
+	color: #fff;
+	top: 0rem;
+	right: -0rem;
+}
+
+.comparison-section {
+  top: 10rem;
+  position: relative;
+  height: 10rem;
+  /* 和上面统一宽度规则 */
+  width: 90%;
+  max-width: 80rem;
+  background: #646464;
+	border-radius: 2rem;
+	border: #00F5D4 solid 0.5rem;
+	box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+	text-align: center;
+}
+
+.comparison-text {
+  position: relative;
+	top: -1rem;
+	font-size: 3rem;
+	color: #fff;
+}
+
+.comparison-text-span {
+	font-size: 4rem;
+	color: #00F5D4;
+}
+
+.improvement-section {
+  position: relative;
+	margin-top: 10rem; 
+	margin-bottom: 0rem; 
+  width: 90%;
+  max-width: 80rem;
+	height: auto;
+}
+
+.improvement-title {
+  margin-left: 22rem;
+  position: relative;
+  top: 2rem;
+  font-size: 5rem;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 5rem;
+}
+
+.icon-upgrade {
+  font-size: 5rem;
+  color: #FFCB24;
+  margin-left: 2rem;
+}
+
+.end-box{
+  width: 98%;
+  height: auto;
+  background-color: #9E9E9E;
+  border-radius: 2rem;
+	border: #FFCB24 solid 0.5rem;
+	box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+  margin-left: 0.5rem;
+  margin-bottom: 4rem;
+  padding-bottom: 2rem;
+}
+
+.end-title{
+  margin-left: 3rem;
+  font-size: 4rem;
+  font-weight: bold;
+  color: #FFCB24;
+}
+
+.end-text{
+  margin-left: 3rem;
+  margin-top: 1rem;
+  font-size: 3rem;
+  color: #fff;
+}
+
+/* 按钮区域：用 Flex 布局替代固定 top，避免位置错乱 */
+.button-section {
+  z-index: 10;
+  margin-left: 25rem;
+  position: relative; 
+  display: flex; /* 新增：Flex 布局让按钮和图标对齐 */
+  margin-bottom: 3rem;
+  align-items: center; 
+  border-color: #fff;
+  top: -3rem;;
+}
+
+/* 图标：用 rem 调整间距 */
+.icon-denglu{
+  font-size: 7rem;
+  color: #01F5D4;
+  margin-left: -48rem; /* -50px ÷ 3.75 ≈ -13.33rem */
+}
+
+/* 按钮：用 rem 调整尺寸和边距 */
+.free-analysis-btn {
+  border: #fff solid 0.5rem;
+  background: #595959;
+  width: 50rem; 
+  height: 10rem; 
+  color: white;
+  /* border: none; */
+  border-radius: 2.67rem; /* 10px ÷ 3.75 ≈ 2.67rem */
+  font-size: 4.5rem; 
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding-left: 5rem;
+}
+
+
+
+</style>
