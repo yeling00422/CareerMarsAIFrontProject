@@ -321,14 +321,24 @@ export default {
 </script>
 
 <style scoped>
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(4rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
 
 .title-section {
   margin-top: 18rem;
   margin-bottom: 6rem;
+  animation: fadeInUp 0.5s ease both;
 }
 
 .title {
-  font-size: 8rem; /* 稍微缩小原10rem以平衡视觉 */
+  font-size: 8rem;
   font-weight: 900;
   color: #333;
   text-align: center;
@@ -341,7 +351,6 @@ export default {
 
 /* 主内容区 */
 .main-container {
-  /* width: 100%; */
   width: 80rem;
   height: 110rem;
   max-width: 120rem;
@@ -359,6 +368,12 @@ export default {
   padding: 8rem 5rem;
   box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(1rem);
+  animation: fadeInUp 0.6s ease 0.1s both;
+  transition: box-shadow 0.3s ease;
+}
+
+.login-card:hover {
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.1), 0 0 3rem rgba(83, 228, 199, 0.2);
 }
 
 /* 输入框通用样式 */
@@ -393,16 +408,26 @@ export default {
   position: absolute;
   height: 7rem;
   width: 16rem;
-  background: #53E4C7;
+  background: linear-gradient(90deg, #53E4C7, #3ecfb5, #53E4C7);
+  background-size: 200% auto;
   color: white;
   border: none;
   border-radius: 1rem;
   font-size: 2.5rem;
   right: 2rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  animation: shimmer 3s linear infinite;
+}
+
+.send-code-btn:not(:disabled):hover {
+  transform: translateY(-0.2rem);
+  box-shadow: 0 0.5rem 1.5rem rgba(83, 228, 199, 0.5);
 }
 
 .send-code-btn:disabled {
   background: #ccc;
+  animation: none;
   cursor: not-allowed;
 }
 
@@ -445,21 +470,27 @@ export default {
 .register-btn {
   width: 90%;
   height: 8rem;
-  background: #53E4C7;
+  background: linear-gradient(90deg, #53E4C7, #3ecfb5, #53E4C7);
+  background-size: 200% auto;
   color: white;
   border: none;
   border-radius: 1rem;
   font-size: 3rem;
   font-weight: bold;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
   margin-top: 2rem;
   margin-left: 3.5rem;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  animation: shimmer 3s linear infinite;
 }
 
 .register-btn:hover {
-  transform: translateY(-1rem);
-  box-shadow: 0 1rem 2rem rgba(83, 228, 199, 0.4);
+  transform: translateY(-0.3rem);
+  box-shadow: 0 1rem 2.5rem rgba(83, 228, 199, 0.5);
+}
+
+.register-btn:active {
+  transform: scale(0.97);
 }
 
 .register-select{
@@ -557,4 +588,27 @@ export default {
   color: #53E4C7;
   font-weight: bold;
 }
+
+@keyframes floatBubble {
+  0%   { transform: translateY(0) scale(1); opacity: 0.7; }
+  50%  { opacity: 0.3; }
+  100% { transform: translateY(-120vh) scale(0.3); opacity: 0; }
+}
+.particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.particle { position: absolute; bottom: -5rem; border-radius: 50%; background: radial-gradient(circle, rgba(0, 245, 212, 0.9), rgba(0, 245, 212, 0.1)); animation: floatBubble linear infinite; }
+.p1  { width:2rem;   height:2rem;   left:5%;  animation-duration:7s;  animation-delay:0s;   }
+.p2  { width:3rem;   height:3rem;   left:15%; animation-duration:9s;  animation-delay:1s;   }
+.p3  { width:1.5rem; height:1.5rem; left:25%; animation-duration:6s;  animation-delay:2s;   }
+.p4  { width:4rem;   height:4rem;   left:35%; animation-duration:11s; animation-delay:0.5s; }
+.p5  { width:2rem;   height:2rem;   left:45%; animation-duration:8s;  animation-delay:3s;   }
+.p6  { width:3.5rem; height:3.5rem; left:55%; animation-duration:10s; animation-delay:1.5s; }
+.p7  { width:1.5rem; height:1.5rem; left:65%; animation-duration:7s;  animation-delay:4s;   }
+.p8  { width:2.5rem; height:2.5rem; left:75%; animation-duration:9s;  animation-delay:2s;   }
+.p9  { width:3rem;   height:3rem;   left:85%; animation-duration:6s;  animation-delay:0.8s; }
+.p10 { width:2rem;   height:2rem;   left:92%; animation-duration:8s;  animation-delay:3.5s; }
+.p11 { width:4.5rem; height:4.5rem; left:10%; animation-duration:12s; animation-delay:2.5s; }
+.p12 { width:1.8rem; height:1.8rem; left:30%; animation-duration:7.5s;animation-delay:5s;   }
+.p13 { width:2.5rem; height:2.5rem; left:50%; animation-duration:9.5s;animation-delay:1s;   }
+.p14 { width:3rem;   height:3rem;   left:70%; animation-duration:8.5s;animation-delay:4.5s; }
+.p15 { width:2rem;   height:2rem;   left:88%; animation-duration:7s;  animation-delay:6s;   }
 </style>

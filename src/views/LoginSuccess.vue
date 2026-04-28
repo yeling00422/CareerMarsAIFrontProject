@@ -136,12 +136,27 @@ export default {
 </script>
 
 <style scoped>
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(4rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes cardPulse {
+  0%, 100% { box-shadow: 0 0 1rem rgba(0, 245, 212, 0.2); }
+  50%       { box-shadow: 0 0 3rem rgba(0, 245, 212, 0.5); }
+}
 
 .report-head {
   position: relative;
   text-align: center;
   margin-bottom: 2rem;
   margin-top: 15rem;
+  animation: fadeInUp 0.5s ease both;
 }
 
 .head-title {
@@ -167,6 +182,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  animation: fadeInUp 0.6s ease 0.1s both;
 }
 
 .head-div {
@@ -179,6 +195,7 @@ export default {
   background-color: #646464;
 	border-radius: 5rem;
 	border: #00F5D4 solid 0.5rem;
+  animation: cardPulse 3s ease-in-out infinite;
 }
 
 .report-text{
@@ -228,6 +245,12 @@ export default {
 	border: #FFCB24 solid 0.5rem;
 	box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
   margin-bottom: 4rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.end-box:hover {
+  transform: translateX(0.5rem);
+  box-shadow: 0 0 2rem rgba(255, 203, 36, 0.4);
 }
 
 .first-line{
@@ -275,16 +298,27 @@ export default {
 }
 
 .free-analysis-btn {
-  border: #fff solid 0.5rem;
-  background: #595959;
-  width: 50rem; 
-  height: 10rem; 
+  border: #00F5D4 solid 0.5rem;
+  background: linear-gradient(90deg, #595959, #717171, #595959);
+  background-size: 200% auto;
+  width: 50rem;
+  height: 10rem;
   color: white;
-  border-radius: 2.67rem; 
-  font-size: 4.5rem; 
+  border-radius: 2.67rem;
+  font-size: 4.5rem;
   cursor: pointer;
-  transition: all 0.3s ease;
   padding-left: 5rem;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  animation: shimmer 3s linear infinite;
+}
+
+.free-analysis-btn:hover {
+  transform: translateY(-0.3rem);
+  box-shadow: 0 0 2rem rgba(0, 245, 212, 0.5);
+}
+
+.free-analysis-btn:active {
+  transform: scale(0.97);
 }
 
 .star {
@@ -311,19 +345,41 @@ export default {
 
 .mask-layer {
   position: absolute;
-  top: 0;               
+  top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   backdrop-filter: blur(12px);
-
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0) 0%,
     rgba(0, 0, 0, 0.45) 30%,
     rgba(0, 0, 0, 0.75) 100%
   );
-  pointer-events: none;   /* ✅ 不影响点击 */
+  pointer-events: none;
   z-index: 5;
 }
+
+@keyframes floatBubble {
+  0%   { transform: translateY(0) scale(1); opacity: 0.7; }
+  50%  { opacity: 0.3; }
+  100% { transform: translateY(-120vh) scale(0.3); opacity: 0; }
+}
+.particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.particle { position: absolute; bottom: -5rem; border-radius: 50%; background: radial-gradient(circle, rgba(0, 245, 212, 0.9), rgba(0, 245, 212, 0.1)); animation: floatBubble linear infinite; }
+.p1  { width:2rem;   height:2rem;   left:5%;  animation-duration:7s;  animation-delay:0s;   }
+.p2  { width:3rem;   height:3rem;   left:15%; animation-duration:9s;  animation-delay:1s;   }
+.p3  { width:1.5rem; height:1.5rem; left:25%; animation-duration:6s;  animation-delay:2s;   }
+.p4  { width:4rem;   height:4rem;   left:35%; animation-duration:11s; animation-delay:0.5s; }
+.p5  { width:2rem;   height:2rem;   left:45%; animation-duration:8s;  animation-delay:3s;   }
+.p6  { width:3.5rem; height:3.5rem; left:55%; animation-duration:10s; animation-delay:1.5s; }
+.p7  { width:1.5rem; height:1.5rem; left:65%; animation-duration:7s;  animation-delay:4s;   }
+.p8  { width:2.5rem; height:2.5rem; left:75%; animation-duration:9s;  animation-delay:2s;   }
+.p9  { width:3rem;   height:3rem;   left:85%; animation-duration:6s;  animation-delay:0.8s; }
+.p10 { width:2rem;   height:2rem;   left:92%; animation-duration:8s;  animation-delay:3.5s; }
+.p11 { width:4.5rem; height:4.5rem; left:10%; animation-duration:12s; animation-delay:2.5s; }
+.p12 { width:1.8rem; height:1.8rem; left:30%; animation-duration:7.5s;animation-delay:5s;   }
+.p13 { width:2.5rem; height:2.5rem; left:50%; animation-duration:9.5s;animation-delay:1s;   }
+.p14 { width:3rem;   height:3rem;   left:70%; animation-duration:8.5s;animation-delay:4.5s; }
+.p15 { width:2rem;   height:2rem;   left:88%; animation-duration:7s;  animation-delay:6s;   }
 </style>

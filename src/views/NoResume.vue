@@ -4,40 +4,37 @@
 
     <div class="middle-container">
       <div class="name-div">
-        <span class="name-text" >姓名</span>
+        <span class="name-text">姓名</span>
         <input type="text" class="input-name" placeholder="   请填写姓名" v-model="formData.name">
       </div>
       <div class="educational-div">
         <span class="educational-text">最高学历</span>
-        <select class="input-educational" placeholder="请选择学历" v-model="formData.educationalQualifications">
-          <option value="" disabled selected aria-placeholder="">请选择最高学历</option>
+        <select class="input-educational" v-model="formData.educationalQualifications">
+          <option value="" disabled selected>请选择最高学历</option>
           <option value="其他">其他</option>
           <option value="专科">专科</option>
           <option value="本科">本科</option>
           <option value="硕士">硕士</option>
           <option value="博士">博士</option>
-        </select>      
+        </select>
       </div>
-
       <div class="skill-div">
         <span class="skill-text">专业技能</span>
         <input type="text" class="input-skill" placeholder="   请填写专业技能" v-model="formData.skill">
       </div>
-
       <div class="educational-experience-div">
         <span class="educational-experience-text">教育经历</span>
         <textarea class="input-educational-experience" placeholder="  请填写教育经历" v-model="formData.educationalExperience"></textarea>
       </div>
-
       <div class="job-experience-div">
         <span class="job-experience-text">工作经历</span>
         <textarea class="input-job-experience" placeholder="  请填写工作经历" v-model="formData.jobExperience"></textarea>
       </div>
     </div>
-    
+
     <div class="hint-div">
       <input type="checkbox" class="custom-checkbox" id="agree-check" v-model="isAgree">
-      <p class="hint-text">我已阅读并同意<span class="service-text">服务条款</span>和<span class="privacy-text">隐私设置</span>。我理解我填写的简历数据将被用于AI分析和职业匹配。</p>      
+      <p class="hint-text">我已阅读并同意<span class="service-text">服务条款</span>和<span class="privacy-text">隐私设置</span>。我理解我填写的简历数据将被用于AI分析和职业匹配。</p>
     </div>
 
     <div class="btn-div">
@@ -53,19 +50,15 @@ import { getAiURL } from '@/utils/index';
 
 const api = axios.create({
   baseURL: getAiURL(),
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 });
 
 export default {
   name: 'NoResume',
   data() {
     return {
-      isAgree: false, // 复选框勾选状态，默认未勾选
-      showTip: false,  // 错误提示是否显示，默认隐藏
+      isAgree: false,
       resumeText: '',
-      // 表单数据
       formData: {
         name: '张三',
         educationalQualifications: '本科',
@@ -73,17 +66,14 @@ export default {
         educationalExperience: '2018-2022 华东理工大学 计算机科学与技术专业',
         jobExperience: '2022-至今 腾讯公司 软件工程师'
       }
-    }
+    };
   },
   methods: {
-    // --- 其他逻辑 ---
     validateForm() {
       if (!this.isAgree) {
         alert('请先勾选同意服务条款及隐私协议');
         return false;
       }
-
-      // 1. 基础非空校验
       const requiredFields = [
         { field: 'name', label: '姓名' },
         { field: 'educationalQualifications', label: '最高学历' },
@@ -91,181 +81,125 @@ export default {
         { field: 'educationalExperience', label: '教育经历' },
         { field: 'jobExperience', label: '工作经历' }
       ];
-
-      for (let item of requiredFields) {
+      for (const item of requiredFields) {
         const value = this.formData[item.field];
-        // 增加对 null 或 undefined 的判断
         if (value === null || value === undefined || String(value).trim() === '') {
           alert(`请填写${item.label}`);
           return false;
         }
       }
-
-      const eduStatus = String(this.formData.educationalQualifications || '').trim();
-
-      // 2. 定义合法的选项列表 (对应你 template 里的 option value)
       const validOptions = ['其他', '专科', '本科', '硕士', '博士'];
-
-      // 3. 增强判断：
-      // 如果为空、或者包含"未知"、或者不在合法列表中，则拦截
-      if (!eduStatus || eduStatus.includes('未知') || !validOptions.includes(eduStatus)) {
+      const eduStatus = String(this.formData.educationalQualifications || '').trim();
+      if (!eduStatus || !validOptions.includes(eduStatus)) {
         alert('请手动选择您的正确最高学历！');
-        // 此时可以重置一下数据，让 select 框恢复默认
-        this.formData.educationalQualifications = ''; 
+        this.formData.educationalQualifications = '';
         return false;
       }
       return true;
     },
+
     buildResumeText() {
       const f = this.formData;
-      return `
-    【姓名】${f.name}
-    【最高学历】${f.educationalQualifications}
-    【专业技能】${f.skill}
-    【教育经历】${f.educationalExperience}
-    【工作经历】${f.jobExperience}`.trim();
+      return `【姓名】${f.name}\n【最高学历】${f.educationalQualifications}\n【专业技能】${f.skill}\n【教育经历】${f.educationalExperience}\n【工作经历】${f.jobExperience}`;
     },
+
     async handleNext() {
       if (!this.validateForm()) return;
       this.resumeText = this.buildResumeText();
-      console.log("生成的简历文本：", this.resumeText);
       alert('正在分析解析的简历文本是否合法，请稍候。。。');
-      const responseData = await api.post("/ai/judgment/resume", this.resumeText, {
-        headers: {
-          'Content-Type': 'text/plain;charset=UTF-8'
-        }
-      });   
+      const responseData = await api.post('/ai/judgment/resume', this.resumeText, {
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' }
+      });
       const result = responseData.data;
-      console.log("result:", result);
-      if(result.code !== 200) {
+      if (result.code !== 200) {
         alert(result.msg || '简历信息有误！请重新输入选择正确的简历文件');
         return;
       }
-
-      this.$router.push({
-        path: '/analysis-resume',
-        query: { resumeText: this.resumeText },
-      });
+      this.$router.push({ path: '/analysis-resume', query: { resumeText: this.resumeText } });
     },
+
     handleReturn() {
-      this.$router.push({
-        path: '/upload-resume',
-        query: { resumeText: this.resumeText },
-      });
+      this.$router.push({ path: '/upload-resume', query: { resumeText: this.resumeText } });
     },
   },
-}
-
+};
 </script>
 
 <style scoped>
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(3rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-.title-div{
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.title-div {
   position: relative;
   top: 12rem;
   font-size: 6rem;
   color: #000;
   display: flex;
   justify-content: center;
-  align-items: center;   
+  align-items: center;
+  animation: fadeInUp 0.5s ease both;
 }
 
-.title-green-text{
-  color: #00F5D4;
-}
+.title-green-text { color: #00F5D4; }
 
-
-.upload-container{
+.middle-container {
   position: relative;
-  top: 10rem;
-  left: 10rem;
-  width: 80rem;
-  height: 8rem;
-  display: flex;
-  justify-content: space-between;
-
-}
-
-.upload-img,
-.upload-file,
-.generate-template{
-  width: 25rem;
-  height: 8rem;
-  border-radius: 2rem;
-  background-color: #595959;
-  display: flex;
-  justify-content: center;
-  align-self: center;
-}
-
-.icon-shangchuantupian,
-.icon-shangchuanwenjian,
-.icon-zidongshengcheng{
-  font-size: 5rem;
-  margin-right: 1rem;
-  color: #fff;
-  margin-top: 1rem;
-}
-
-.upload-text{
-  font-size: 3rem;
-  color: #00F5D4;
-  margin-top: 1.5rem;
-}
-
-.middle-container{
-  position: relative;
-  top:18rem;
+  top: 18rem;
   left: 10rem;
   width: 80rem;
   height: auto;
   min-height: 100rem;
   background-color: #767676;
   border-radius: 5rem;
-  padding: 8rem 2rem; 
-  box-sizing: border-box; 
+  padding: 8rem 2rem;
+  box-sizing: border-box;
+  animation: fadeInUp 0.6s ease 0.1s both;
 }
 
-.name-text{
-  position: relative;
-  left: 5rem;
-  font-size: 4rem;
-  color: #AAAAAA;
-}
+.name-text { position: relative; left: 5rem; font-size: 4rem; color: #AAAAAA; }
 
-.input-name{
+.input-name {
   position: relative;
   left: 11rem;
   width: 55rem;
   height: 7rem;
   border-radius: 2rem;
   border: none;
+  transition: box-shadow 0.2s ease;
 }
 
-.educational-div{
-  margin-top: 5rem;
-}
+.input-name:focus,
+.input-skill:focus { outline: none; box-shadow: 0 0 1rem rgba(0, 245, 212, 0.5); }
 
-.input-educational{
+.educational-div { margin-top: 5rem; }
+
+.educational-text { font-size: 4rem; color: #AAAAAA; }
+
+.input-educational {
   position: relative;
   left: 3rem;
-  width: 56rem ;
+  width: 56rem;
   height: 8rem;
   border-radius: 2rem;
   border: none;
   padding-left: 2rem;
+  transition: box-shadow 0.2s ease;
 }
 
-.educational-text{
-  font-size: 4rem;
-  color: #AAAAAA;
-}
+.input-educational:focus { outline: none; box-shadow: 0 0 1rem rgba(0, 245, 212, 0.5); }
 
-.skill-div{
-  margin-top: 5rem;
-}
+.skill-div { margin-top: 5rem; }
 
-.input-skill{
+.skill-text { font-size: 4rem; color: #AAAAAA; }
+
+.input-skill {
   position: relative;
   left: 3rem;
   width: 55rem;
@@ -274,17 +208,29 @@ export default {
   border: none;
 }
 
-.skill-text{
-  font-size: 4rem;
-  color: #AAAAAA;
-}
+.educational-experience-div { position: relative; margin-top: 5rem; }
 
-.educational-experience-div{
+.educational-experience-text { position: absolute; top: 0rem; font-size: 4rem; color: #AAAAAA; }
+
+.input-educational-experience {
   position: relative;
-  margin-top: 5rem;
+  left: 19rem;
+  width: 55rem;
+  height: auto;
+  min-height: 20rem;
+  border-radius: 2rem;
+  border: none;
+  transition: box-shadow 0.2s ease;
 }
 
-.input-educational-experience{
+.input-educational-experience:focus,
+.input-job-experience:focus { outline: none; box-shadow: 0 0 1rem rgba(0, 245, 212, 0.5); }
+
+.job-experience-div { position: relative; margin-top: 5rem; }
+
+.job-experience-text { position: absolute; top: 0rem; font-size: 4rem; color: #AAAAAA; }
+
+.input-job-experience {
   position: relative;
   left: 19rem;
   width: 55rem;
@@ -294,112 +240,60 @@ export default {
   border: none;
 }
 
-.educational-experience-text{
-  position: absolute;
-  top: 0rem;
-  font-size: 4rem;
-  color: #AAAAAA;
-}
-
-.job-experience-div{
-  position: relative;
-  margin-top: 5rem;
-}
-
-.input-job-experience{
-  position: relative;
-  left: 19rem;
-  width: 55rem;
-  height: auto;
-  min-height: 20rem;  
-  border-radius: 2rem;
-  border: none;
-}
-
-.job-experience-text{
-  position: absolute;
-  top: 0rem;
-  font-size: 4rem;
-  color: #AAAAAA;
-}
-
-.hint-div{
+.hint-div {
   position: relative;
   left: 10rem;
   display: flex;
   top: 12rem;
   width: 78rem;
   margin-top: 10rem;
+  animation: fadeInUp 0.6s ease 0.2s both;
 }
 
-.hint-text{
-  position: relative;
-  left: 1rem;
-  top: -4rem;
-  font-size: 3.5rem;
-  color: #000;
-}
+.hint-text { position: relative; left: 1rem; top: -4rem; font-size: 3.5rem; color: #000; }
 
-.service-text{
-  color: #00F5D4;
-  text-decoration: underline;
-}
+.service-text,
+.privacy-text { color: #00F5D4; text-decoration: underline; }
 
-.privacy-text{
-  color: #00F5D4;
-  text-decoration: underline;
-}
-
-.btn-div{
+.btn-div {
   position: relative;
   top: 10rem;
   margin-left: 20rem;
-}
-
-/* 按钮：用 rem 调整尺寸和边距 */
-.free-analysis-btn {
-  background: #01F5D4;
-  color: #595959;
-  width: 60rem; 
-  height: 8rem; 
-  border: none;
-  border-radius: 3rem; 
-  font-size: 4rem; 
-
-  display: flex;
-  justify-content: center;  
-  align-items: center;    
-  /* margin-top: 4rem; */
-  margin-bottom: 5rem;
+  animation: fadeInUp 0.6s ease 0.25s both;
 }
 
 .free-analysis-btn {
-  background: #01F5D4;
+  background: linear-gradient(90deg, #01F5D4, #00c9aa, #01F5D4);
+  background-size: 200% auto;
   color: #595959;
-  width: 60rem; 
-  height: 8rem; 
+  width: 60rem;
+  height: 8rem;
   border: none;
-  border-radius: 3rem; 
-  font-size: 4rem; 
-
-  display: flex;
-  justify-content: center;  
-  align-items: center;    
-  /* margin-top: 4rem; */
-  margin-bottom: 5rem;
-}
-.icon-sanjiaoxing {
-  margin-left: 2rem;
+  border-radius: 3rem;
   font-size: 4rem;
-  color: yellow;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 5rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  animation: shimmer 3s linear infinite;
 }
+
+.free-analysis-btn:hover {
+  transform: translateY(-0.3rem);
+  box-shadow: 0 0 2.5rem rgba(1, 245, 212, 0.5);
+}
+
+.free-analysis-btn:active { transform: scale(0.97); }
+
+.icon-sanjiaoxing { margin-left: 2rem; font-size: 4rem; color: yellow; }
 
 .custom-checkbox {
   width: 4rem !important;
   height: 4rem !important;
-  min-width:4rem;
-  min-height:4rem;
-
+  min-width: 4rem;
+  min-height: 4rem;
   appearance: none;
   border: 0.3rem solid #000;
   border-radius: 0.8rem;
@@ -417,4 +311,26 @@ export default {
   transform: rotate(45deg);
 }
 
+@keyframes floatBubble {
+  0%   { transform: translateY(0) scale(1); opacity: 0.7; }
+  50%  { opacity: 0.3; }
+  100% { transform: translateY(-120vh) scale(0.3); opacity: 0; }
+}
+.particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.particle { position: absolute; bottom: -5rem; border-radius: 50%; background: radial-gradient(circle, rgba(0, 245, 212, 0.9), rgba(0, 245, 212, 0.1)); animation: floatBubble linear infinite; }
+.p1  { width:2rem;   height:2rem;   left:5%;  animation-duration:7s;  animation-delay:0s;   }
+.p2  { width:3rem;   height:3rem;   left:15%; animation-duration:9s;  animation-delay:1s;   }
+.p3  { width:1.5rem; height:1.5rem; left:25%; animation-duration:6s;  animation-delay:2s;   }
+.p4  { width:4rem;   height:4rem;   left:35%; animation-duration:11s; animation-delay:0.5s; }
+.p5  { width:2rem;   height:2rem;   left:45%; animation-duration:8s;  animation-delay:3s;   }
+.p6  { width:3.5rem; height:3.5rem; left:55%; animation-duration:10s; animation-delay:1.5s; }
+.p7  { width:1.5rem; height:1.5rem; left:65%; animation-duration:7s;  animation-delay:4s;   }
+.p8  { width:2.5rem; height:2.5rem; left:75%; animation-duration:9s;  animation-delay:2s;   }
+.p9  { width:3rem;   height:3rem;   left:85%; animation-duration:6s;  animation-delay:0.8s; }
+.p10 { width:2rem;   height:2rem;   left:92%; animation-duration:8s;  animation-delay:3.5s; }
+.p11 { width:4.5rem; height:4.5rem; left:10%; animation-duration:12s; animation-delay:2.5s; }
+.p12 { width:1.8rem; height:1.8rem; left:30%; animation-duration:7.5s;animation-delay:5s;   }
+.p13 { width:2.5rem; height:2.5rem; left:50%; animation-duration:9.5s;animation-delay:1s;   }
+.p14 { width:3rem;   height:3rem;   left:70%; animation-duration:8.5s;animation-delay:4.5s; }
+.p15 { width:2rem;   height:2rem;   left:88%; animation-duration:7s;  animation-delay:6s;   }
 </style>

@@ -1,5 +1,8 @@
 <template>
   <div class="app">
+    <div class="particles">
+      <span v-for="i in 15" :key="i" class="particle" :class="'p' + i"></span>
+    </div>
     <router-view/>
     <img src="./assets/img/上面固定栏.png" class="logo" />
   </div>

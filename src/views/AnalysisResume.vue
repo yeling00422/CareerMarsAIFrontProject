@@ -1,14 +1,10 @@
 <template>
   <div class="analysisResume-page">
-    <!-- 分析容器 -->
     <div class="analysis-container">
-      <!-- 科技感圆形图案 -->
       <img src="../assets/img/分析元素.png" class="element-image"/>
-      <!-- 进度条 -->
       <div class="progress-bar">
         <div class="progress-fill" :style="{ width: progress + '%' }"></div>
       </div>
-      <!-- 文字内容 -->
       <div class="text-content">
         <h2 class="main-text">正在分析<span class="green-text">简历文本</span></h2>
         <p class="sub-text">AI正在根据您的简历信息生成性格测试题...</p>
@@ -24,27 +20,22 @@ import { MessageBox } from 'element-ui';
 
 const api = axios.create({
   baseURL: getAiURL(),
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 });
 
-console.log("api:",api);
-// 请求拦截器添加token
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
 export default {
   name: 'AnalysisResume',
-    data() {
+  data() {
     return {
       progress: 0,
       progressTimer: null,
-      timeoutTimer: null, 
+      timeoutTimer: null,
     };
   },
   created() {
@@ -52,40 +43,29 @@ export default {
   },
   beforeDestroy() {
     clearInterval(this.progressTimer);
+    clearTimeout(this.timeoutTimer);
   },
   methods: {
     startTimeoutReload() {
-      this.timeoutTimer = setTimeout(() => {
-        window.location.reload();
-      }, 180000); // 180 秒
+      this.timeoutTimer = setTimeout(() => window.location.reload(), 180000);
     },
+
     async loadData() {
+      clearTimeout(this.timeoutTimer);
+      this.startTimeoutReload();
+      this.startProgressAnimation();
       try {
-        clearTimeout(this.timeoutTimer);
-        this.startTimeoutReload();      
-        this.startProgressAnimation();
-
         const resumeText = this.$route.query.resumeText;
-        const API_PATH = "/ai/generate/characteristicsTest";
-        const response = await api.post(API_PATH, resumeText, {
-          headers: {
-            'Content-Type': 'text/plain;charset=UTF-8'
-          }
-        });        
-        console.log("接口调用成功，返回的数据是：", response);
-
-        // 处理后端返回的Result结构
+        const response = await api.post('/ai/generate/characteristicsTest', resumeText, {
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' }
+        });
         const result = response.data;
-        console.log("result：", result);
-        console.log("result.code:", result.code);
-        console.log("result.data：", result.data);
-
         clearInterval(this.progressTimer);
         clearTimeout(this.timeoutTimer);
         if (result.code === 200 || result.code === 0) {
           this.$router.push({
             path: '/characteristics-test',
-            query: { 
+            query: {
               characteristicsTest: JSON.stringify(result.data),
               resumeText: resumeText
             }
@@ -96,17 +76,14 @@ export default {
             cancelButtonText: '返回首页',
             type: 'warning',
             customClass: 'center-dialog',
-          }).then(action => {
-            if (action === 'confirm') {
-              this.loadData();
-            } 
+          }).then(() => {
+            this.loadData();
           }).catch(() => {
             this.$router.push('/');
           });
         }
-      } catch (error) {
-        clearTimeout(this.timeoutTimer); 
-        console.error("接口调用失败，错误信息是：", error);
+      } catch (e) {
+        clearTimeout(this.timeoutTimer);
       }
     },
 
@@ -114,43 +91,83 @@ export default {
       this.progress = 0;
       clearInterval(this.progressTimer);
       this.progressTimer = setInterval(() => {
-        if (this.progress < 90) {
-          this.progress += Math.random() * 5;
-        }
+        if (this.progress < 90) this.progress += Math.random() * 5;
       }, 500);
     },
   }
-}
+};
 </script>
 
 <style scoped>
-/* 分析容器 */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes pulse {
+  0%, 100% { filter: drop-shadow(0 0 1rem rgba(0, 255, 200, 0.3)); }
+  50%       { filter: drop-shadow(0 0 4rem rgba(0, 255, 200, 0.8)); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(3rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scanDown {
+  0%   { top: -3%; opacity: 0; }
+  10%  { opacity: 0.8; }
+  90%  { opacity: 0.5; }
+  100% { top: 103%; opacity: 0; }
+}
+@keyframes borderGlow {
+  0%, 100% { border-color: rgba(0, 245, 212, 0.2); }
+  50%       { border-color: rgba(0, 245, 212, 0.7); box-shadow: 0 0 4rem rgba(0,245,212,0.3), inset 0 0 2rem rgba(0,245,212,0.05); }
+}
+
 .analysis-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   background: rgba(64, 64, 64, 0.95);
-  width: 85rem; 
+  width: 85rem;
   height: 140rem;
   margin-left: 7.5rem;
   margin-top: 30rem;
   margin-bottom: 12rem;
   border-radius: 4rem;
+  border: 0.3rem solid rgba(0, 245, 212, 0.2);
+  animation: fadeInUp 0.6s ease both, borderGlow 3s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
 }
-
+.analysis-container::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -3%;
+  width: 100%;
+  height: 0.4rem;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 200, 0.8), transparent);
+  animation: scanDown 3.5s ease-in-out infinite;
+  z-index: 10;
+  pointer-events: none;
+}
 
 .element-image {
   position: relative;
   z-index: 2;
-  top: -30rem;
-  width: 80%;
-  height: 80%;
-  filter: drop-shadow(0 0 20px rgba(0, 255, 200, 0.3));
   top: -20rem;
   left: -2rem;
+  width: 80%;
+  height: 80%;
+  animation: pulse 2.5s ease-in-out infinite;
 }
 
-/* 进度条 */
 .progress-bar {
   width: 30%;
   height: 2rem;
@@ -165,10 +182,11 @@ export default {
 
 .progress-fill {
   height: 100%;
-  width: 30%;
-  background: linear-gradient(90deg, #00ffc8, #00cc9f);
+  background: linear-gradient(90deg, #00ffc8, #00cc9f, #00ffc8);
+  background-size: 200% auto;
   border-radius: 2rem;
   transition: width 0.8s ease;
+  animation: shimmer 1.5s linear infinite;
 }
 
 .text-content {
@@ -177,6 +195,7 @@ export default {
   margin-top: -45rem;
   z-index: 2;
   position: relative;
+  animation: fadeInUp 0.7s ease 0.3s both;
 }
 
 .main-text {
@@ -192,6 +211,4 @@ export default {
   font-size: 3rem;
   color: #ffffffcb;
 }
-
-
 </style>
