@@ -1,5 +1,8 @@
 <template>
   <div class="uploadResume-page">
+    <div class="particles">
+      <span v-for="i in 15" :key="i" class="particle" :class="'p' + i"></span>
+    </div>
     <div class="title-div">请上传您的<span class="title-green-text">简历</span></div>
 
     <input type="file" ref="imageInput" accept="image/*" style="display: none" @change="handleImageChange">
