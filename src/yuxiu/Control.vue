@@ -84,6 +84,14 @@
 </template>
 
 <script>
+import axios from 'axios';
+import { getAiURL } from '@/utils/index';
+
+const api = axios.create({
+  baseURL: getAiURL(),
+  headers: { 'Content-Type': 'application/json' },
+});
+
 export default {
   name: 'Control',
   data() {
@@ -91,9 +99,9 @@ export default {
       form: { name: '', work: '' },
       scores: [null, null, null, null],
       items: [
-        { icon: '🎬', name: '影视内涵' },
-        { icon: '🎙️', name: '语音语调' },
-        { icon: '💝', name: '情感表达' },
+        { icon: '🎬', name: '难度系数' },
+        { icon: '🎙️', name: '作品完成率' },
+        { icon: '💝', name: '发音吐字准确度' },
         { icon: '🎭', name: '角色还原度' }
       ],
       statusText: '⚡ 等待打分…'
@@ -109,7 +117,6 @@ export default {
     this.loadFromLocal()
   },
   methods: {
-    // 关键：用 $set 强制更新数组，让 Vue 检测到变化
     setScore(idx, val) {
       this.$set(this.scores, idx, val)
       this.autoSave()
@@ -137,40 +144,46 @@ export default {
         localStorage.setItem('yuxiu_data', JSON.stringify(data))
       } catch (e) {}
     },
-    publish() {
-      const name = this.form.name.trim()
-      const work = this.form.work.trim()
-      if (!name && !work) {
-        alert('请先填写选手姓名或作品名称！')
-        return
-      }
-      const filled = this.scores.filter(s => s !== null)
-      if (filled.length < 4) {
-        if (!confirm('还有' + (4 - filled.length) + '项未打分，确定发布？')) {
-          return
-        }
-      }
-      const total = this.scores.reduce((a, b) => a + (b === null ? 0 : b), 0)
-      const data = {
-        name: name,
-        work: work,
-        scores: [...this.scores],
-        published: true,
-        total: total,
-        ts: Date.now()
-      }
+    async publish() {
       try {
-        localStorage.setItem('yuxiu_data', JSON.stringify(data))
-      } catch (e) {}
-      this.statusText = '✅ 已发布！' + name + (work ? '《' + work + '》' : '') + '  总分' + total + '分'
+          const dto = {
+            name: this.form.name,
+            work: this.form.work,
+            score1: this.scores[0],
+            score2: this.scores[1],
+            score3: this.scores[2],
+            score4: this.scores[3],
+          }
+          await api.post('/ai/yxb/insert/score', dto)
+          alert('✅ 发布成功！大屏幕已同步')
+          this.statusText = '✅ 已发布到大屏幕'
+        } catch (err) {
+          alert('❌ 发布失败')
+          console.error(err)
+        }
     },
-    resetAll() {
-      if (!confirm('确定重置全部分数？')) return
-      this.scores = [null, null, null, null]
-      this.form.name = ''
-      this.form.work = ''
-      this.statusText = '⚡ 已重置，等待打分…'
-      this.autoSave()
+    async resetAll() {
+       try {
+        const dto = {
+          name: '',
+          work: '',
+          score1: null,
+          score2: null,
+          score3: null,
+          score4: null,
+        }
+        await api.post('/ai/yxb/insert/score', dto)
+
+        this.form.name = ''
+        this.form.work = ''
+        this.scores = [null, null, null, null]
+        localStorage.removeItem('yuxiu_data')
+
+        alert('✅ 已全部重置')
+        this.statusText = '⚡ 已重置'
+      } catch (err) {
+        alert('❌ 重置失败')
+      }
     },
     loadFromLocal() {
       try {
@@ -188,15 +201,7 @@ export default {
 }
 </script>
 
-<style>
-/* html, body {
-  margin: 0;
-  padding: 0;
-  background: #0F0A1E;
-  overflow: auto !important;
-  height: auto !important;
-} */
-
+<style scoped>
 .control-page {
   min-height: 100vh;
   background: #0F0A1E;
@@ -244,7 +249,7 @@ export default {
   border: 1px solid rgba(168,85,247,.4);
   border-radius: 999px;
   padding: 4px 16px;
-  font-size: 11px;
+  font-size: 20px;
   letter-spacing: .4em;
   color: #C084FC;
   margin-bottom: 8px;
@@ -276,7 +281,7 @@ export default {
 }
 
 .sec-title {
-  font-size: 11px;
+  font-size: 15px;
   letter-spacing: .5em;
   color: #C084FC;
   opacity: .7;
