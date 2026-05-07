@@ -61,8 +61,8 @@
 
           <div class="agreement-text">
             登录 即代表您阅读并同意
-            <span class="link-highlight" @click="toDeal">[用户协议]</span>
-            <span class="link-highlight" @click="toHide">[隐私政策]</span>
+            <span class="link-highlight" @click="$parent.showDeal = true">[用户协议]</span>
+            <span class="link-highlight" @click="$parent.showHide = true">[隐私政策]</span>
           </div>
 
           <button class="login-btn">登录</button>

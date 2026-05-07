@@ -306,6 +306,13 @@ export default {
 }
 .option:hover::before { opacity: 1; }
 
+/* 给未选中态的样式加上更高的优先级，确保默认样式一致 */
+.option:not(.selected) {
+  background-color: #7a7d85 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  box-shadow: none !important;
+}
+
 .option.selected {
   border-color: #00F5D4;
   background-color: #555a66;

@@ -34,7 +34,7 @@
 
     <div class="hint-div">
       <input type="checkbox" class="custom-checkbox" id="agree-check" v-model="isAgree">
-      <p class="hint-text">我已阅读并同意<span class="service-text">服务条款</span>和<span class="privacy-text">隐私设置</span>。我理解我填写的简历数据将被用于AI分析和职业匹配。</p>
+      <p class="hint-text">我已阅读并同意<span class="service-text" @click="$parent.showDeal = true">服务条款</span>和<span class="privacy-text" @click="$parent.showHide = true">隐私设置</span>。我理解我填写的简历数据将被用于AI分析和职业匹配。</p>
     </div>
 
     <div class="btn-div">
@@ -126,16 +126,6 @@ export default {
 </script>
 
 <style scoped>
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(3rem); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
 .title-div {
   position: relative;
   top: 12rem;
@@ -263,21 +253,19 @@ export default {
 }
 
 .free-analysis-btn {
-  background: linear-gradient(90deg, #01F5D4, #00c9aa, #01F5D4);
-  background-size: 200% auto;
-  color: #595959;
+  background-color: #595959;
+  border: 0.3rem solid #53E4C7;
+  color: #fff;
   width: 60rem;
   height: 8rem;
-  border: none;
   border-radius: 3rem;
   font-size: 4rem;
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 5rem;
-  cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.2s ease;
-  animation: shimmer 3s linear infinite;
+  animation: cardGlow 3s ease-in-out infinite;
 }
 
 .free-analysis-btn:hover {

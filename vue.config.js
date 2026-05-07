@@ -2,6 +2,7 @@ const path = require('path');  // 👈 加上这一行
 
 module.exports = {
   publicPath: '/ai/',
+  outputDir: 'ai',
   productionSourceMap: false,
   lintOnSave: false,
 

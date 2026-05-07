@@ -1,8 +1,5 @@
 <template>
   <div class="uploadResume-page">
-    <div class="particles">
-      <span v-for="i in 15" :key="i" class="particle" :class="'p' + i"></span>
-    </div>
     <div class="title-div">请上传您的<span class="title-green-text">简历</span></div>
 
     <input type="file" ref="imageInput" accept="image/*" style="display: none" @change="handleImageChange">
@@ -31,7 +28,9 @@
 
     <div class="hint-div">
       <input type="checkbox" class="custom-checkbox" id="agree-check" v-model="isAgree">
-      <p class="hint-text">我已阅读并同意<span class="service-text">服务条款</span>和<span class="privacy-text">隐私设置</span>。我理解我的简历数据将被用于AI分析和职业匹配。</p>
+      <p class="hint-text">我已阅读并同意<span class="service-text" 
+        @click="$parent.showDeal = true">服务条款</span>和<span class="privacy-text" 
+        @click="$parent.showHide = true">隐私设置</span>。我理解我的简历数据将被用于AI分析和职业匹配。</p>
     </div>
 
     <div class="btn-div">
@@ -56,6 +55,8 @@ export default {
     return {
       isAgree: false,
       resumeText: null,
+      showDeal: false,
+      showHide: false
     };
   },
   methods: {
@@ -143,25 +144,6 @@ export default {
 </script>
 
 <style scoped>
-@keyframes slideInDown {
-  from { opacity: 0; transform: translateY(-4rem); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(4rem); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-@keyframes cardGlow {
-  0%, 100% { box-shadow: 0 0 1rem rgba(0, 245, 212, 0.2); }
-  50%       { box-shadow: 0 0 3rem rgba(0, 245, 212, 0.6), 0 0 6rem rgba(0, 245, 212, 0.2); }
-}
 
 .title-div {
   position: relative;
@@ -193,6 +175,7 @@ export default {
   height: 8rem;
   border-radius: 2rem;
   background-color: #595959;
+  border: 0.3rem solid #53E4C7;
   display: flex;
   justify-content: center;
   align-self: center;
@@ -262,21 +245,19 @@ export default {
 }
 
 .free-analysis-btn {
-  background: linear-gradient(90deg, #01F5D4, #00c9aa, #01F5D4);
-  background-size: 200% auto;
-  color: #595959;
+  color: #fff;
+  background-color: #595959;
+  border: 0.3rem solid #53E4C7;
   width: 60rem;
   height: 8rem;
-  border: none;
   border-radius: 3rem;
   font-size: 4rem;
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 5rem;
-  cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.2s ease;
-  animation: shimmer 3s linear infinite;
+  animation: cardGlow 3s ease-in-out infinite;
 }
 
 .free-analysis-btn:hover {
@@ -344,26 +325,5 @@ export default {
   color: #000;
 }
 
-@keyframes floatBubble {
-  0%   { transform: translateY(0) scale(1); opacity: 0.7; }
-  50%  { opacity: 0.3; }
-  100% { transform: translateY(-120vh) scale(0.3); opacity: 0; }
-}
-.particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-.particle { position: absolute; bottom: -5rem; border-radius: 50%; background: radial-gradient(circle, rgba(0, 245, 212, 0.9), rgba(0, 245, 212, 0.1)); animation: floatBubble linear infinite; }
-.p1  { width:2rem;   height:2rem;   left:5%;  animation-duration:7s;  animation-delay:0s;   }
-.p2  { width:3rem;   height:3rem;   left:15%; animation-duration:9s;  animation-delay:1s;   }
-.p3  { width:1.5rem; height:1.5rem; left:25%; animation-duration:6s;  animation-delay:2s;   }
-.p4  { width:4rem;   height:4rem;   left:35%; animation-duration:11s; animation-delay:0.5s; }
-.p5  { width:2rem;   height:2rem;   left:45%; animation-duration:8s;  animation-delay:3s;   }
-.p6  { width:3.5rem; height:3.5rem; left:55%; animation-duration:10s; animation-delay:1.5s; }
-.p7  { width:1.5rem; height:1.5rem; left:65%; animation-duration:7s;  animation-delay:4s;   }
-.p8  { width:2.5rem; height:2.5rem; left:75%; animation-duration:9s;  animation-delay:2s;   }
-.p9  { width:3rem;   height:3rem;   left:85%; animation-duration:6s;  animation-delay:0.8s; }
-.p10 { width:2rem;   height:2rem;   left:92%; animation-duration:8s;  animation-delay:3.5s; }
-.p11 { width:4.5rem; height:4.5rem; left:10%; animation-duration:12s; animation-delay:2.5s; }
-.p12 { width:1.8rem; height:1.8rem; left:30%; animation-duration:7.5s;animation-delay:5s;   }
-.p13 { width:2.5rem; height:2.5rem; left:50%; animation-duration:9.5s;animation-delay:1s;   }
-.p14 { width:3rem;   height:3rem;   left:70%; animation-duration:8.5s;animation-delay:4.5s; }
-.p15 { width:2rem;   height:2rem;   left:88%; animation-duration:7s;  animation-delay:6s;   }
+
 </style>

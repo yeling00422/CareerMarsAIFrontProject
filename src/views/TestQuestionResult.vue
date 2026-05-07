@@ -1,8 +1,5 @@
 <template>
   <div class="testQuestionResult-page">
-    <div class="particles">
-      <span v-for="i in 15" :key="i" class="particle" :class="'p' + i"></span>
-    </div>
     <div class="report-title">
       <p class="head-text">你的职业准备度分析</p>
       <p class="head-next-text">基于简历、岗位匹配和面试表现的综合评估</p>
@@ -11,11 +8,11 @@
     <div class="middle-container">
       <div class="main-score">
         <svg class="progress-ring" viewBox="0 0 100 100">
-          <circle class="progress-ringbackground"/>
-          <circle class="progress-ringcircle" :stroke-dasharray="circumference" :stroke-dashoffset="strokeDashoffset"/>
+          <circle class="progress-ringbackground" r="40" cx="50" cy="50"/>
+          <circle class="progress-ringcircle" r="40" cx="50" cy="50" :stroke-dasharray="circumference" :stroke-dashoffset="strokeDashoffset"/>
         </svg>
         <p class="score-label">综合评分</p>
-        <p class="score-number"><span class="main-number">{{ avgScore }}</span>%</p>
+        <p class="score-number"><span class="main-number">{{ avgScore }}</span></p>
       </div>
 
       <div class="mini-scores">
@@ -98,7 +95,7 @@
 
     <div class="button-section">
       <button class="free-analysis-btn" @click="goNext">下一页</button>
-      <span class="iconfont icon-sanjiaoxing"></span>
+      <!-- <span class="iconfont icon-sanjiaoxing"></span> -->
     </div>
   </div>
 </template>
@@ -233,25 +230,6 @@ export default {
 </script>
 
 <style scoped>
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(4rem); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes cardPulse {
-  0%, 100% { box-shadow: 0 0 1rem rgba(0, 245, 212, 0.2), 0 0.5rem 1.5rem rgba(0,0,0,0.1); }
-  50%       { box-shadow: 0 0 3rem rgba(0, 245, 212, 0.5), 0 0.5rem 1.5rem rgba(0,0,0,0.1); }
-}
-
-@keyframes radarGlow {
-  0%, 100% { filter: drop-shadow(0 0 0.5rem rgba(0, 245, 212, 0.4)); }
-  50%       { filter: drop-shadow(0 0 2rem rgba(0, 245, 212, 0.9)); }
-}
-
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
 
 .report-title {
   text-align: center;
@@ -298,14 +276,12 @@ export default {
   stroke: #e6e6e6;
   stroke-width: 1rem;
   fill: transparent;
-  r: 40; cx: 50; cy: 50;
 }
 
 .progress-ringcircle {
   stroke: #00F5D4;
   stroke-width: 1rem;
   fill: transparent;
-  r: 40; cx: 50; cy: 50;
   transform-origin: 50% 50%;
   transform: rotate(-90deg);
   transition: stroke-dashoffset 0.6s ease;
@@ -547,14 +523,6 @@ export default {
   color: #fff;
 }
 
-.button-section {
-  width: 20rem;
-  margin-left: 40rem;
-  position: relative;
-  display: flex;
-  margin-bottom: 3rem;
-  align-items: center;
-}
 
 .icon-sanjiaoxing {
   font-size: 3rem;
@@ -563,49 +531,17 @@ export default {
 }
 
 .free-analysis-btn {
-  background: linear-gradient(90deg, #595959, #717171, #595959);
-  background-size: 200% auto;
   width: 40rem;
   height: 8rem;
+  background-color: #595959;
   color: white;
-  border: none;
+  border: 0.3rem solid #53E4C7;
   border-radius: 2.67rem;
   font-size: 4rem;
-  cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.2s ease;
-  margin-left: -10rem;
-  animation: shimmer 3s linear infinite;
+  margin-left: 30rem;
+  margin-bottom: 5rem;
+  animation: cardGlow 3s ease-in-out infinite;
 }
 
-.free-analysis-btn:hover {
-  transform: translateY(-0.3rem);
-  box-shadow: 0 0 2rem rgba(0, 245, 212, 0.4);
-}
-
-.free-analysis-btn:active {
-  transform: scale(0.96);
-}
-
-@keyframes floatBubble {
-  0%   { transform: translateY(0) scale(1); opacity: 0.7; }
-  50%  { opacity: 0.3; }
-  100% { transform: translateY(-120vh) scale(0.3); opacity: 0; }
-}
-.particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-.particle { position: absolute; bottom: -5rem; border-radius: 50%; background: radial-gradient(circle, rgba(0, 245, 212, 0.9), rgba(0, 245, 212, 0.1)); animation: floatBubble linear infinite; }
-.p1  { width:2rem;   height:2rem;   left:5%;  animation-duration:7s;  animation-delay:0s;   }
-.p2  { width:3rem;   height:3rem;   left:15%; animation-duration:9s;  animation-delay:1s;   }
-.p3  { width:1.5rem; height:1.5rem; left:25%; animation-duration:6s;  animation-delay:2s;   }
-.p4  { width:4rem;   height:4rem;   left:35%; animation-duration:11s; animation-delay:0.5s; }
-.p5  { width:2rem;   height:2rem;   left:45%; animation-duration:8s;  animation-delay:3s;   }
-.p6  { width:3.5rem; height:3.5rem; left:55%; animation-duration:10s; animation-delay:1.5s; }
-.p7  { width:1.5rem; height:1.5rem; left:65%; animation-duration:7s;  animation-delay:4s;   }
-.p8  { width:2.5rem; height:2.5rem; left:75%; animation-duration:9s;  animation-delay:2s;   }
-.p9  { width:3rem;   height:3rem;   left:85%; animation-duration:6s;  animation-delay:0.8s; }
-.p10 { width:2rem;   height:2rem;   left:92%; animation-duration:8s;  animation-delay:3.5s; }
-.p11 { width:4.5rem; height:4.5rem; left:10%; animation-duration:12s; animation-delay:2.5s; }
-.p12 { width:1.8rem; height:1.8rem; left:30%; animation-duration:7.5s;animation-delay:5s;   }
-.p13 { width:2.5rem; height:2.5rem; left:50%; animation-duration:9.5s;animation-delay:1s;   }
-.p14 { width:3rem;   height:3rem;   left:70%; animation-duration:8.5s;animation-delay:4.5s; }
-.p15 { width:2rem;   height:2rem;   left:88%; animation-duration:7s;  animation-delay:6s;   }
 </style>

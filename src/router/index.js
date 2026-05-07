@@ -57,6 +57,7 @@ const routes = [
   { path: '/end-load', component: EndLoad },
   { path: '/end-result', component: EndResult },
 
+
   // { path: '/match-industry', component: MatchIndustry },
   // { path: '/match-test-name', component: MatchTestName },
   // { path: '/match-load', component: MatchLoad },

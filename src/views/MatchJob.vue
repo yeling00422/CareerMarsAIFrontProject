@@ -1,8 +1,5 @@
 <template>
   <div class="matchJob-page">
-    <div class="particles">
-      <span v-for="i in 15" :key="i" class="particle" :class="'p' + i"></span>
-    </div>
     <div class="main-content">
       <div class="title-section">
         <span v-if="allJobs.length > 0">
@@ -172,15 +169,6 @@ export default {
 </script>
 
 <style scoped>
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(3rem); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
 
 .main-content {
   flex: 1;
@@ -268,6 +256,7 @@ export default {
 .job-card.selected {
   border: 2px solid #01F5D4;
   box-shadow: 0 0 2rem rgba(1, 245, 212, 0.4);
+  animation: cardGlow 3s ease-in-out infinite;
 }
 
 .job-name {
@@ -307,10 +296,12 @@ export default {
 }
 
 .btn-start {
-  background: linear-gradient(90deg, #01F5D4, #00c9aa, #01F5D4);
-  background-size: 200% auto;
-  color: #333;
-  animation: shimmer 2.5s linear infinite;
+  color: #fff;
+  background-color: #595959;
+  border: 0.3rem solid #53E4C7;
+  border-radius: 3rem;
+  font-size: 3.5rem;
+  animation: cardGlow 3s ease-in-out infinite;
 }
 
 .btn-start:hover {
@@ -380,26 +371,4 @@ export default {
   color: #ccc;
 }
 
-@keyframes floatBubble {
-  0%   { transform: translateY(0) scale(1); opacity: 0.7; }
-  50%  { opacity: 0.3; }
-  100% { transform: translateY(-120vh) scale(0.3); opacity: 0; }
-}
-.particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-.particle { position: absolute; bottom: -5rem; border-radius: 50%; background: radial-gradient(circle, rgba(0, 245, 212, 0.9), rgba(0, 245, 212, 0.1)); animation: floatBubble linear infinite; }
-.p1  { width:2rem;   height:2rem;   left:5%;  animation-duration:7s;  animation-delay:0s;   }
-.p2  { width:3rem;   height:3rem;   left:15%; animation-duration:9s;  animation-delay:1s;   }
-.p3  { width:1.5rem; height:1.5rem; left:25%; animation-duration:6s;  animation-delay:2s;   }
-.p4  { width:4rem;   height:4rem;   left:35%; animation-duration:11s; animation-delay:0.5s; }
-.p5  { width:2rem;   height:2rem;   left:45%; animation-duration:8s;  animation-delay:3s;   }
-.p6  { width:3.5rem; height:3.5rem; left:55%; animation-duration:10s; animation-delay:1.5s; }
-.p7  { width:1.5rem; height:1.5rem; left:65%; animation-duration:7s;  animation-delay:4s;   }
-.p8  { width:2.5rem; height:2.5rem; left:75%; animation-duration:9s;  animation-delay:2s;   }
-.p9  { width:3rem;   height:3rem;   left:85%; animation-duration:6s;  animation-delay:0.8s; }
-.p10 { width:2rem;   height:2rem;   left:92%; animation-duration:8s;  animation-delay:3.5s; }
-.p11 { width:4.5rem; height:4.5rem; left:10%; animation-duration:12s; animation-delay:2.5s; }
-.p12 { width:1.8rem; height:1.8rem; left:30%; animation-duration:7.5s;animation-delay:5s;   }
-.p13 { width:2.5rem; height:2.5rem; left:50%; animation-duration:9.5s;animation-delay:1s;   }
-.p14 { width:3rem;   height:3rem;   left:70%; animation-duration:8.5s;animation-delay:4.5s; }
-.p15 { width:2rem;   height:2rem;   left:88%; animation-duration:7s;  animation-delay:6s;   }
 </style>
