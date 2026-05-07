@@ -21,6 +21,8 @@ import TestQuestionResultLoad from '../views/TestQuestionResultLoad.vue'
 import TestQuestionResult from '../views/TestQuestionResult.vue'
 import EndLoad from '../views/EndLoad.vue'
 import EndResult from '../views/EndResult.vue'
+import Screen from '../yuxiu/Screen.vue'
+import Control from '../yuxiu/Control.vue'
 
 // import MatchIndustry from '../views/MatchIndustry.vue'
 // import MatchTestName from '../views/MatchTestName.vue'
@@ -56,6 +58,8 @@ const routes = [
   { path: '/test-question-result', component: TestQuestionResult },
   { path: '/end-load', component: EndLoad },
   { path: '/end-result', component: EndResult },
+  { path: '/screen', component: Screen },
+  { path: '/control', component: Control },
 
 
   // { path: '/match-industry', component: MatchIndustry },
