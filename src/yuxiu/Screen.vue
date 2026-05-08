@@ -7,7 +7,7 @@
 
       <div class="header">
         <div class="badge">✦ 毓秀杯电影配音交流赛 · 第一期 · 2026 ✦</div>
-        <div class="title">以声会友&emsp;深入人心</div>
+        <div class="title">以声会友&emsp;声深入心</div>
       </div>
 
       <div class="sep">
@@ -178,7 +178,7 @@
               <div class="label">当前选手 : <span class="p-name" id="playerName">— 等待选手 —</span></div>
               <div class="label">作品名称 : <span class="p-work" id="playerWork">— —</span></div>
             </div>
-            <div class="total-box">
+            <div class="total-box" style="display: none;">
               <div class="label">综合总分</div>
               <div class="total-num" id="totalScore">—</div>
               <div class="total-sub">满分 80 分</div>
@@ -211,6 +211,20 @@
       </div>
 
       <div class="cf-wrap" id="cfWrap"></div>
+      <div class="score-list-button" @click="toggleScoreList">
+        <span class="slb-arrow">{{ showScoreList ? '▶' : '◀' }}</span>
+        <span class="slb-label">排行榜</span>
+      </div>
+      <div class="score-list" v-show="showScoreList">
+        <div class="sl-header">🏆 选手得分榜</div>
+        <div class="sl-body">
+          <div class="sl-row" v-for="(item, i) in scoreList" :key="i">
+            <span class="sl-rank" :class="'top-' + (i + 1)">{{ i + 1 }}</span>
+            <span class="sl-name">{{ item[0] }}</span>
+            <span class="sl-score">{{ item[1] }}</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -226,6 +240,21 @@ const SPEECH = [
   [60, '太棒了！这位选手实力超强！👏💫'],
   [48, '不错哦！继续努力会更棒！😊💪'],
   [0,  '加油加油！下次一定会更好！💕'],
+];
+const scoreList = [
+  ['一号选手', '100'],
+  ['二号选手', '85'],
+  ['三号选手', '75'],
+  ['四号选手', '60'],
+  ['五号选手', '60'],
+  ['六号选手', '60'],
+  ['七号选手', '60'],
+  ['八号选手', '60'],
+  ['九号选手', '60'],
+  ['十号选手', '60'],
+  ['十一号选手', '60'],
+  ['十二号选手', '60'],
+  ['十三号选手', '60'],
 ];
 const IDLE = [
   '你好呀～我是小水滴！准备为选手们认真打分！✨',
@@ -245,7 +274,7 @@ const MOUTH = {
 
 export default {
   name: 'Screen',
-  data() { return { lastData: null }; },
+  data() { return { lastData: null, showScoreList: false, scoreList }; },
   mounted() {
     this.scaleScreen();
     window.addEventListener('resize', this.scaleScreen);
@@ -400,6 +429,9 @@ export default {
           this.setSpeech(IDLE[Math.floor(Math.random() * IDLE.length)]);
         }
       }, 7000);
+    },
+    toggleScoreList() {
+      this.showScoreList = !this.showScoreList;
     },
   },
 };
@@ -606,4 +638,112 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
 .cf-wrap { position: absolute; inset: 0; z-index: 200; pointer-events: none; }
 .cf { position: absolute; border-radius: 3px; animation: fall linear forwards; }
 @keyframes fall { 0%{transform:translateY(-10px) rotate(0deg);opacity:1} 100%{transform:translateY(105vh) rotate(720deg);opacity:0} }
+
+.score-list-button {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 160px;
+  background: linear-gradient(180deg, rgba(168,85,247,.55), rgba(255,143,171,.45));
+  border: 1px solid rgba(168,85,247,.6);
+  border-radius: 14px 0 0 14px;
+  z-index: 100;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background .2s, box-shadow .2s;
+  user-select: none;
+}
+.score-list-button:hover {
+  background: linear-gradient(180deg, rgba(168,85,247,.8), rgba(255,143,171,.7));
+  box-shadow: 0 0 20px rgba(168,85,247,.45);
+}
+.slb-arrow {
+  font-size: 12px;
+  color: rgba(255,255,255,.9);
+}
+.slb-label {
+  writing-mode: vertical-rl;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.score-list {
+  position: absolute;
+  left: 650px;
+  top: 250px;
+  width: 1100px;
+  height: 720px;
+  background: rgba(8, 5, 20, .97);
+  /* background: rgba(174, 167, 200, 0.97); */
+  border: 1px solid rgba(168,85,247,.35);
+  border-top: none;
+  border-radius: 0 0 24px 24px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 36px 48px 40px;
+  box-shadow: 0 16px 60px rgba(0,0,0,.6);
+}
+.sl-header {
+  font-family: "STKaiti","KaiTi",serif;
+  font-size: 38px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #F0D27A, #FF8FAB, #C084FC);
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: 5px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+.sl-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sl-row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 20px 36px;
+  background: rgba(168,85,247,.07);
+  border: 1px solid rgba(168,85,247,.14);
+  border-radius: 16px;
+}
+.sl-rank {
+  font-size: 30px;
+  font-weight: 900;
+  width: 48px;
+  text-align: center;
+  color: rgba(255,255,255,.35);
+}
+.top-1 { background: linear-gradient(135deg,#F0D27A,#FFB800); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.top-2 { background: linear-gradient(135deg,#D0D0D0,#F0F0F0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.top-3 { background: linear-gradient(135deg,#CD7F32,#E8A060); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.sl-name {
+  flex: 1;
+  font-family: "STKaiti","KaiTi",serif;
+  font-size: 30px;
+  font-weight: bold;
+  color: rgba(255,255,255,.88);
+  letter-spacing: 2px;
+}
+.sl-score {
+  font-size: 46px;
+  font-weight: 900;
+  background: linear-gradient(135deg,#F0D27A,#FF8FAB,#C084FC);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 5s linear infinite;
+}
 </style>
