@@ -181,28 +181,40 @@
             <div class="total-box" style="display: none;">
               <div class="label">综合总分</div>
               <div class="total-num" id="totalScore">—</div>
-              <div class="total-sub">满分 80 分</div>
+              <div class="total-sub">满分 20 星</div>
             </div>
           </div>
 
           <div class="score-grid">
             <div class="sc-card" id="sc0">
               <div class="sc-top"><span class="sc-icon">🎬</span><span class="sc-cat">难度系数</span></div>
+              <div class="sc-stars" id="ss0">
+                <span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span>
+              </div>
               <div class="sc-num" id="n0">—</div>
               <div class="bar-wrap"><div class="bar" id="b0"></div></div>
             </div>
             <div class="sc-card" id="sc1">
               <div class="sc-top"><span class="sc-icon">🎙️</span><span class="sc-cat">作品完成率</span></div>
+              <div class="sc-stars" id="ss1">
+                <span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span>
+              </div>
               <div class="sc-num" id="n1">—</div>
               <div class="bar-wrap"><div class="bar" id="b1"></div></div>
             </div>
             <div class="sc-card" id="sc2">
               <div class="sc-top"><span class="sc-icon">💝</span><span class="sc-cat">发音吐字准确度</span></div>
+              <div class="sc-stars" id="ss2">
+                <span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span>
+              </div>
               <div class="sc-num" id="n2">—</div>
               <div class="bar-wrap"><div class="bar" id="b2"></div></div>
             </div>
             <div class="sc-card" id="sc3">
               <div class="sc-top"><span class="sc-icon">🎭</span><span class="sc-cat">角色还原度</span></div>
+              <div class="sc-stars" id="ss3">
+                <span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span>
+              </div>
               <div class="sc-num" id="n3">—</div>
               <div class="bar-wrap"><div class="bar" id="b3"></div></div>
             </div>
@@ -218,10 +230,10 @@
       <div class="score-list" v-show="showScoreList">
         <div class="sl-header">🏆 选手得分榜</div>
         <div class="sl-body">
-          <div class="sl-row" v-for="(item, i) in scoreList" :key="i">
-            <span class="sl-rank" :class="'top-' + (i + 1)">{{ i + 1 }}</span>
-            <span class="sl-name">{{ item[0] }}</span>
-            <span class="sl-score">{{ item[1] }}</span>
+          <div class="sl-row" v-for="(item, i) in visibleScoreList" :key="scoreListOffset + i">
+            <span class="sl-rank" :class="'top-' + (scoreListOffset + i + 1)">{{ scoreListOffset + i + 1 }}</span>
+            <span class="sl-name">{{ item.name }}</span>
+            <span class="sl-score">{{ item.score }}</span>
           </div>
         </div>
       </div>
@@ -236,25 +248,10 @@ import { getAiURL } from '@/utils/index';
 const api = axios.create({ baseURL: getAiURL(), headers: { 'Content-Type': 'application/json' } });
 const FIELDS = ['score1', 'score2', 'score3', 'score4'];
 const SPEECH = [
-  [72, '哇哦！！满分级别。小水滴超级感动！🌟✨🎉'],
-  [60, '太棒了！这位选手实力超强！👏💫'],
-  [48, '不错哦！继续努力会更棒！😊💪'],
+  [18, '哇哦！！满星级别。小水滴超级感动！🌟✨🎉'],
+  [15, '太棒了！这位选手实力超强！👏💫'],
+  [12, '不错哦！继续努力会更棒！😊💪'],
   [0,  '加油加油！下次一定会更好！💕'],
-];
-const scoreList = [
-  ['一号选手', '100'],
-  ['二号选手', '85'],
-  ['三号选手', '75'],
-  ['四号选手', '60'],
-  ['五号选手', '60'],
-  ['六号选手', '60'],
-  ['七号选手', '60'],
-  ['八号选手', '60'],
-  ['九号选手', '60'],
-  ['十号选手', '60'],
-  ['十一号选手', '60'],
-  ['十二号选手', '60'],
-  ['十三号选手', '60'],
 ];
 const IDLE = [
   '你好呀～我是小水滴！准备为选手们认真打分！✨',
@@ -274,7 +271,12 @@ const MOUTH = {
 
 export default {
   name: 'Screen',
-  data() { return { lastData: null, showScoreList: false, scoreList }; },
+  data() { return { lastData: null, showScoreList: false, scoreList: [], scoreListOffset: 0 }; },
+  computed: {
+    visibleScoreList() {
+      return this.scoreList.slice(this.scoreListOffset, this.scoreListOffset + 5);
+    },
+  },
   mounted() {
     this.scaleScreen();
     window.addEventListener('resize', this.scaleScreen);
@@ -334,15 +336,15 @@ export default {
 
       if (total == null) {
         mouthPath  = MOUTH.idle;
-      } else if (total >= 72) {
+      } else if (total >= 18) {
         mouthPath    = MOUTH.excited;
         openOpacity  = '1';
         teethOpacity = '1';
         stateClass   = 'state-excited';
-      } else if (total >= 60) {
+      } else if (total >= 15) {
         mouthPath  = MOUTH.happy;
         stateClass = 'state-happy';
-      } else if (total >= 48) {
+      } else if (total >= 12) {
         mouthPath  = MOUTH.normal;
         stateClass = 'state-normal';
       } else {
@@ -385,13 +387,26 @@ export default {
           const num  = document.getElementById(`n${i}`);
           const bar  = document.getElementById(`b${i}`);
           const card = document.getElementById(`sc${i}`);
+          const stars = document.querySelectorAll(`#ss${i} .star`);
           if (val == null || isNaN(val)) {
             num.innerText = '—';
             bar.style.width = '0%'; card.classList.remove('lit');
+            stars.forEach(s => { s.className = 'star star-off'; s.removeAttribute('style'); });
           } else {
             const v = Number(val);
-            num.innerText = v;
-            bar.style.width = `${v / 20 * 100}%`; card.classList.add('lit');
+            num.innerText = v % 1 === 0 ? v.toFixed(1) : String(v);
+            bar.style.width = `${v / 5 * 100}%`; card.classList.add('lit');
+            stars.forEach((s, si) => {
+              const fill = Math.min(100, Math.max(0, (v - si) * 100));
+              if (fill >= 100) {
+                s.className = 'star star-on'; s.removeAttribute('style');
+              } else if (fill <= 0) {
+                s.className = 'star star-off'; s.removeAttribute('style');
+              } else {
+                s.className = 'star';
+                s.setAttribute('style', `background:linear-gradient(90deg,#F0D27A ${fill.toFixed(1)}%,rgba(255,255,255,.15) ${fill.toFixed(1)}%);-webkit-background-clip:text;-webkit-text-fill-color:transparent`);
+              }
+            });
             total += v; counted++;
             if (changed) { num.classList.add('bump'); setTimeout(() => num.classList.remove('bump'), 500); }
           }
@@ -400,7 +415,7 @@ export default {
         document.getElementById('totalScore').innerText = counted > 0 ? total : '—';
         this.updateExpression(counted > 0 ? total : null);
 
-        if (changed && counted > 0 && total >= 72) this.confetti();
+        if (changed && counted > 0 && total >= 18) this.confetti();
         if (changed && counted > 0) {
           const sp = SPEECH.find(s => total >= s[0]);
           if (sp) this.setSpeech(sp[1]);
@@ -418,11 +433,21 @@ export default {
         document.getElementById(`n${i}`).innerText = '—';
         document.getElementById(`b${i}`).style.width = '0%';
         document.getElementById(`sc${i}`).classList.remove('lit');
+        document.querySelectorAll(`#ss${i} .star`).forEach(s => { s.className = 'star star-off'; s.removeAttribute('style'); });
       });
       this.updateExpression(null);
     },
 
-    startPoll() { this.fetchLatest(); setInterval(this.fetchLatest, 3000); },
+    async fetchScoreList() {
+      try {
+        const { data } = await api.get('/ai/yxb/search/endScore');
+        if (Array.isArray(data.data)) {
+          this.scoreList = data.data;
+          this.scoreListOffset = 0;
+        }
+      } catch (e) {}
+    },
+    startPoll() { this.fetchLatest(); setInterval(this.fetchLatest, 10000); },
     startIdleSpeech() {
       setInterval(() => {
         if (!this.lastData || !this.lastData.name) {
@@ -432,6 +457,22 @@ export default {
     },
     toggleScoreList() {
       this.showScoreList = !this.showScoreList;
+      if (this.showScoreList) {
+        this.fetchScoreList();
+        this.startScoreListCycle();
+      } else {
+        if (this._scoreListTimer) {
+          clearInterval(this._scoreListTimer);
+          this._scoreListTimer = null;
+        }
+      }
+    },
+    startScoreListCycle() {
+      if (this._scoreListTimer) clearInterval(this._scoreListTimer);
+      this._scoreListTimer = setInterval(() => {
+        const next = this.scoreListOffset + 5;
+        this.scoreListOffset = next >= this.scoreList.length ? 0 : next;
+      }, 30000);
     },
   },
 };
@@ -621,9 +662,15 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
 .sc-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .sc-icon { font-size: 32px; }
 .sc-cat  { font-size: 22px; font-weight: bold; color: rgba(255,255,255,.9); }
+.sc-stars {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.star { font-size: 42px; line-height: 1; transition: color .35s; }
+.star-on  { color: #F0D27A; filter: drop-shadow(0 0 7px rgba(240,210,122,.75)); }
+.star-off { color: rgba(255,255,255,.15); }
+
 .sc-num {
-  font-size: 76px; font-weight: 900; text-align: center; flex: 1;
-  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; font-weight: 900; text-align: center;
   background: linear-gradient(135deg,#F0D27A,#FF8FAB,#C084FC); background-size: 220% auto;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   animation: shimmer 5s linear infinite;
@@ -705,7 +752,6 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
 }
 .sl-body {
   flex: 1;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 14px;

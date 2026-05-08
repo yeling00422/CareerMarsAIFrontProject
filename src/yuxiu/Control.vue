@@ -15,47 +15,67 @@
 
       <div class="section">
         <div class="sec-title">选手信息</div>
-        <input
-          v-model="form.name"
-          @input="autoSave"
-          class="inp"
-          placeholder="选手姓名 / 编号…"
-          maxlength="20"
-        />
-        <input
-          v-model="form.work"
-          @input="autoSave"
-          class="inp"
-          placeholder="作品名称…"
-          maxlength="30"
-        />
+        <select v-model="form.name" @change="autoSave" class="inp sel">
+          <option value="">— 请选择选手 —</option>
+          <option>一号选手</option>
+          <option>二号选手</option>
+          <option>三号选手</option>
+          <option>四号选手</option>
+          <option>五号选手</option>
+          <option>六号选手</option>
+          <option>七号选手</option>
+          <option>八号选手</option>
+          <option>九号选手</option>
+          <option>十号选手</option>
+        </select>
+        <select v-model="form.work" @change="autoSave" class="inp sel">
+          <option value="">— 请选择作品 —</option>
+          <option>花木兰</option>
+          <option>魔童闹海</option>
+          <option>觉醒年代</option>
+          <option>魔童降世</option>
+          <option>疯狂动物城</option>
+          <option>大圣归来</option>
+          <option>觉醒年代</option>
+          <option>长安三万里</option>
+          <option>鬼妈妈</option>
+          <option>we are the world</option>
+        </select>
       </div>
 
       <div class="section">
-        <div class="sec-title">评分项目（每项 0 ~ 20 分）</div>
+        <div class="sec-title">评分项目（每项 0 ~ 5 星）</div>
 
         <div class="score-item" v-for="(item, idx) in items" :key="idx">
           <div class="item-header">
             <div class="item-label">{{ item.icon }} {{ item.name }}</div>
-            <div class="item-cur">{{ scores[idx] !== null ? scores[idx] : '—' }}</div>
+            <div class="item-cur">
+              <span
+                v-for="s in 5"
+                :key="s"
+                class="ic-star"
+                :style="starStyle(idx, s)"
+              >★</span>
+              <span class="ic-num">{{ scores[idx] !== null ? scores[idx] : '—' }}</span>
+            </div>
           </div>
 
-          <div class="sbgrid">
-            <button
-              v-for="n in 21"
-              :key="n"
-              class="sbt"
-              :class="{ active: scores[idx] === n - 1 }"
-              @click="handleScoreClick(idx, n - 1)"
-            >
-              {{ n - 1 }}
-            </button>
-          </div>
-
-          <div class="fine-row">
-            <button class="ftb" @click="adj(idx, -1)">－</button>
-            <span class="ft-hint">微调 ±1</span>
-            <button class="ftb" @click="adj(idx, 1)">＋</button>
+          <div class="star-row">
+            <span
+              v-for="s in 5"
+              :key="s"
+              class="star-btn"
+              :style="starStyle(idx, s)"
+              @click="onStarClick(idx, s, $event)"
+            >★</span>
+            <input
+              type="number"
+              class="star-input"
+              :value="scores[idx] !== null ? scores[idx] : ''"
+              min="0" max="5" step="0.1"
+              placeholder="0.0"
+              @input="onScoreInput(idx, $event)"
+            />
           </div>
 
           <div class="item-divider" v-if="idx < 3"></div>
@@ -65,7 +85,7 @@
       <div class="total-box">
         <div>
           <div class="total-label">综合总分</div>
-          <div class="total-sub">满分 80 分</div>
+          <div class="total-sub">满分 20 </div>
         </div>
         <div class="total-num">{{ total }}</div>
       </div>
@@ -121,14 +141,30 @@ export default {
       this.$set(this.scores, idx, val)
       this.autoSave()
     },
-    handleScoreClick(idx, val) {
-      this.setScore(idx, val)
+    starStyle(idx, s) {
+      const score = this.scores[idx];
+      const fill = score === null ? 0 : Math.min(100, Math.max(0, (score - (s - 1)) * 100));
+      if (fill >= 100) return { color: '#F0D27A' };
+      if (fill <= 0)   return { color: 'rgba(255,255,255,.18)' };
+      return {
+        background: `linear-gradient(90deg,#F0D27A ${fill.toFixed(1)}%,rgba(255,255,255,.18) ${fill.toFixed(1)}%)`,
+        webkitBackgroundClip: 'text',
+        webkitTextFillColor: 'transparent',
+      };
     },
-    adj(idx, d) {
-      let cur = this.scores[idx]
-      if (cur === null) cur = 10
-      cur = Math.max(0, Math.min(20, cur + d))
-      this.setScore(idx, cur)
+    onStarClick(idx, s, event) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const frac = Math.max(0.1, Math.round((event.clientX - rect.left) / rect.width * 10) / 10);
+      const val = Math.min(5, Math.round(((s - 1) + frac) * 10) / 10);
+      this.setScore(idx, this.scores[idx] !== null && Math.abs(this.scores[idx] - val) < 0.05 ? null : val);
+    },
+    onScoreInput(idx, event) {
+      const raw = parseFloat(event.target.value);
+      if (isNaN(raw) || event.target.value === '') {
+        this.setScore(idx, null);
+      } else {
+        this.setScore(idx, Math.min(5, Math.max(0, Math.round(raw * 10) / 10)));
+      }
     },
     autoSave() {
       const total = this.scores.reduce((a, b) => a + (b === null ? 0 : b), 0)
@@ -302,33 +338,47 @@ export default {
 
 .inp:focus { border-color: #C084FC; }
 .inp::placeholder { color: rgba(255,255,255,.22); }
+select.inp { -webkit-appearance: none; appearance: none; cursor: pointer; }
+select.inp option { background: #1a1035; color: #fff; }
 
 .score-item { margin-bottom: 16px; }
 .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .item-label { font-size: 15px; font-weight: bold; color: #FFF8FF; }
-.item-cur { font-size: 28px; font-weight: 900; background: linear-gradient(135deg, #F0D27A, #FF8FAB); -webkit-background-clip: text; color: transparent; }
+.item-cur { display: flex; align-items: center; gap: 4px; }
+.ic-star { font-size: 20px; line-height: 1; }
+.ic-star-on  { color: #F0D27A; }
+.ic-star-off { color: rgba(255,255,255,.2); }
+.ic-num { font-size: 20px; font-weight: 900; background: linear-gradient(135deg, #F0D27A, #FF8FAB); -webkit-background-clip: text; color: transparent; margin-left: 6px; min-width: 38px; text-align: right; }
 
 .item-divider { height: 1px; background: rgba(168,85,247,.1); margin: 16px 0; }
 
-.sbgrid { display: flex; flex-wrap: wrap; gap: 6px; }
-.sbt {
-  width: calc((100% - 10*6px)/11);
-  min-width: 34px;
-  padding: 9px 0;
-  border: 1.5px solid rgba(168,85,247,.2);
-  border-radius: 10px;
-  background: rgba(168,85,247,.07);
-  color: rgba(255,255,255,.6);
-  font-size: 13px;
-  font-weight: bold;
+.star-row { display: flex; gap: 10px; align-items: center; justify-content: center; padding: 10px 0 4px; }
+.star-btn {
+  font-size: 44px;
+  line-height: 1;
   cursor: pointer;
+  transition: transform .15s;
+  padding: 4px 6px;
+  user-select: none;
 }
-.sbt:hover { border-color: #C084FC; background: rgba(168,85,247,.22); color: #fff; }
-.sbt.active { border-color: #FF8FAB; background: linear-gradient(135deg, rgba(255,143,171,.25), rgba(168,85,247,.2)); color: #FFB3C6; }
+.star-btn:hover { transform: scale(1.18); }
 
-.fine-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-.ftb { width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid rgba(168,85,247,.3); background: rgba(168,85,247,.1); color: #C084FC; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.ft-hint { font-size: 11px; color: rgba(255,255,255,.25); }
+.star-input {
+  width: 62px;
+  background: rgba(255,255,255,.07);
+  border: 1.5px solid rgba(168,85,247,.3);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 6px 8px;
+  outline: none;
+  text-align: center;
+  margin-left: 6px;
+}
+.star-input:focus { border-color: #C084FC; }
+.star-input::-webkit-outer-spin-button,
+.star-input::-webkit-inner-spin-button { -webkit-appearance: none; }
 
 .total-box {
   background: linear-gradient(135deg, rgba(168,85,247,.12), rgba(255,143,171,.08));
