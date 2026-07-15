@@ -97,23 +97,16 @@ export default {
   },
   methods: {
     loadQuestionData() {
-      const testQuestion = this.$route.query.testQuestion;
-      this.position = this.$route.query.position;
-      this.resumeText = this.$route.query.resumeText;
-      this.userInfo = this.$route.query.userInfo;
-
-      console.log("test-question-testQuestion:", testQuestion);
-      console.log("test-question-position:", this.position);
-      console.log("test-question-resumeText:", this.resumeText);
-
+      const testQuestion = this.$route.params.testQuestion;
+      this.position = this.$route.params.position;
+      this.resumeText = this.$route.params.resumeText;
+      this.userInfo = this.$route.params.userInfo;
 
       if (testQuestion) {
         try {
           const parsedData = JSON.parse(testQuestion);
           // ✅ 使用兼容性写法，不使用可选链
           this.questions = Array.isArray(parsedData) ? parsedData : (parsedData && parsedData.questions ? parsedData.questions : []);
-          console.log("questions:", this.questions);
-          console.log("题目数量:", this.questions.length);
         } catch (error) {
           console.error('解析题目数据失败:', error);
           alert('数据加载失败，请重新尝试');
@@ -303,17 +296,10 @@ export default {
         this.currentPage++;
         this.resetCurrentAnswer();
       } else {
-
-
         this.interviewScore = this.calculateTotalScore();
-        console.log('提交所有答案:', {
-          position: this.position,
-          interviewScore: this.interviewScore,
-          resumeText: this.resumeText
-        });
         this.$router.push({
-          path: '/test-question-result-load',
-          query: { 
+          name: 'TestQuestionResultLoad',
+          params: { 
             position: this.position,
             interviewScore: this.interviewScore,
             resumeText: this.resumeText,
@@ -338,10 +324,10 @@ export default {
 .question-number {
   text-align: center;
   color: #333;
-  padding-top: 5rem;
-  padding-bottom: 4rem;
   font-size: 5rem;
   font-weight: bold;
+  margin-top: 2rem;
+  margin-bottom: 3rem;
 }
 
 .question-card {
@@ -487,14 +473,13 @@ export default {
 
 .test-paper-name {
   text-align: center;
-  color: #999;
+  color: #000;
   font-size: 6rem;
   font-weight: bold;
-
   width: 60rem;
   height: auto;
-  margin: 20rem auto 0;
+  margin: 15rem auto 0;
   border-radius: 2rem;
-  background-color: #00F5D4;
+  /* background-color: #00F5D4; */
 }
 </style>

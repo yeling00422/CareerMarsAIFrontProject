@@ -37,8 +37,6 @@
 
       <!-- 底部按钮区 -->
       <div class="buttons-section">
-        <!-- <button class="btn btn-back" @click="$router.push('/upload')">返回上一步</button> -->
-        <!-- <button class="btn btn-start" @click="$router.push('/analysis-load')">开始精准分析</button> -->
         <button class="btn btn-start" @click="handleFreeAnalysis">下一步</button>
       </div>
     </div>
@@ -118,16 +116,13 @@ export default {
     // 加载匹配数据
     loadMatchData() {
       // 从路由参数中获取数据
-      const matchJob = this.$route.query.matchJob;
-      this.resumeText = this.$route.query.resumeText;
-      this.userInfo = this.$route.query.userInfo;
-      console.log("matchJob:",matchJob);
-      console.log("match-job:userInfo:",this.userInfo);
+      const matchJob = this.$route.params.matchJob;
+      this.resumeText = this.$route.params.resumeText;
+      this.userInfo = this.$route.params.userInfo;
       if (matchJob) {
         try {
           // 解析数据
           this.allJobs = JSON.parse(matchJob);
-          console.log("allJobs",this.allJobs);
         } catch (error) {
           console.error('解析匹配数据失败:', error);
           alert('数据加载失败，请重新尝试');
@@ -164,9 +159,7 @@ export default {
               position: this.position
             }
           });
-          console.log("judgmentResponse:", judgmentResponse);
           const judgmentResult = judgmentResponse.data;
-          console.log("judgmentResponse:", judgmentResponse);
           if(judgmentResult.code !== 200) {
             alert(judgmentResult.msg || '岗位有误！请重新输入正确的岗位信息');
             return;
@@ -182,8 +175,8 @@ export default {
       console.log("position:", this.position);
       console.log("isSelected:", this.isSelect);
       this.$router.push({
-        path: '/generate-test-question-load',
-        query: { 
+        name: 'GenerateTestQuestionLoad',
+        params: { 
           jobId: this.jobId, 
           position: this.position, 
           resumeText: this.resumeText, 

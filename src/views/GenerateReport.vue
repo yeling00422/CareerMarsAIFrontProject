@@ -30,7 +30,6 @@ const api = axios.create({
   },
 });
 
-console.log("api:",api);
 // 请求拦截器添加token
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
@@ -56,13 +55,9 @@ export default {
     async loadData() {
       try {
         this.startProgressAnimation();
-        const characteristicsTest = this.$route.query.characteristicsTest;
-        const userAnswers = this.$route.query.userAnswers;
-        const resumeText = this.$route.query.resumeText;
-        console.log("生成报告中-characteristicsTest:",characteristicsTest);
-        console.log("生成报告中-userAnswers:",userAnswers);
-        console.log("生成报告中-resumeText:",resumeText);
-
+        const characteristicsTest = this.$route.params.characteristicsTest;
+        const userAnswers = this.$route.params.userAnswers;
+        const resumeText = this.$route.params.resumeText;
         const API_PATH = "/ai/generate/report";
         const data = {
           characteristicsTest: JSON.stringify(characteristicsTest),
@@ -70,19 +65,13 @@ export default {
           resumeText: resumeText,
         }
         const response = await api.post(API_PATH,data);
-        console.log("接口调用成功，返回的数据是：", response);     
-
-        // 处理后端返回的Result结构
         const result = response.data;
-        console.log("result：", result);
-        console.log("result.code:", result.code);
-        console.log("result.data：", result.data);
         clearInterval(this.progressTimer);
 
         if (result.code === 200 || result.code === 0) {
           this.$router.push({
-            path: '/login-load',
-            query: { 
+            name: 'LoginLoad',
+            params: { 
               testReport: JSON.stringify(result.data),
               resumeText: resumeText 
             },

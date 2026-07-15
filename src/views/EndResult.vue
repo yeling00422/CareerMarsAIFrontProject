@@ -15,7 +15,6 @@
         <!-- 个人信息区 -->
         <div class="profile-section">
           <!-- 头像占位 -->
-          <!-- <div class="avatar"></div> -->
           <div class="name-div">
             <h2 class="name">{{  currentTeacher.menName }}</h2>
           </div>
@@ -63,9 +62,6 @@
             <span class="iconfont icon-ceshishenqing"></span>
             <span class="feedback-title">学员反馈:</span>
           </div>
-          <!-- <div class="feedback-text">
-            “{{ currentTeacher.feedback }}”
-          </div> -->
         </div>
         <!-- 底部按钮 -->
         <div class="btn-div">
@@ -88,14 +84,6 @@ const api = axios.create({
   withCredentials: true, 
 });
 
-// api.interceptors.request.use(config => {
-//   const token = localStorage.getItem('token');
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
-
 export default {
   name: 'EndResult',
   data() {
@@ -113,30 +101,24 @@ export default {
   },
   methods: {
     async goToConsult() {
-      console.log('咨询导师-token：',this.token);
-      console.log('咨询导师-url：',this.url);
-      console.log('咨询导师-id',this.mentorId);
-      if (this.token !== null && this.token !== '') {
-        try {
-          const API_PATH = "/ai/setCookie";
-          const response = await api.get(API_PATH, {
-            params: {
-              token: this.token,
-              url: this.url,
-            }
-          });
-          console.log("接口调用成功，返回的数据是：", response);
-          console.log("接口调用成功，url是：", this.url+'/teacherDetail?id='+this.mentorId);
-          window.location.href = this.url+'/teacherDetail?id='+this.mentorId;
-        } catch (error) {
-          console.error("接口调用失败，错误信息是：", error);
-          console.log("接口调用失败111，url是：", this.url+'/teacher');
-          window.location.href = this.url+'/teacher';
+      const userInfo = JSON.parse(this.$route.params.userInfo);
+      const studentId = userInfo.id;
+      const API_PATH = "/ai/save/consultation/record";
+      const response = await api.get(API_PATH, {
+        params: {
+          studentId: studentId,
+          mentorId: this.mentorId,
         }
-      }else{
-          console.log("接口调用失败222，url是：", this.url+'/teacher');
-          window.location.href = this.url+'/teacher';
+      });
+      const responseDate =  response.data;
+      if (responseDate.code === 200) {
+        alert('咨询导师成功！后续客服会联系您哦。如客服一直未联系您，请直接联系客服微信：zhiyaxing666或拨打电话：18888888888');
+      }else {
+        alert(responseDate.msg+"后续客服会联系您。如客服一直未联系您，请直接联系客服微信：zhiyaxing666或拨打电话：18888888888");
       }
+    },
+    contactService(){
+
     },
     getStarClass(index) {
       const starValue = index; // 当前是第几颗星（1~5）
@@ -172,34 +154,26 @@ export default {
     lastPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
-        console.log(`进入第 ${this.currentPage}页`);
       } else {
-        console.log('当前已经是第一页了！');
       }
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
-        console.log(`进入第 ${this.currentPage}页`);
       } else {
-        console.log('当前已经是最后一页了');
       }
     },
     loadResultData(){
       // 从路由参数中获取数据
-      this.teachers = JSON.parse(this.$route.query.teachers);
-      this.token = this.$route.query.token;
+      this.teachers = JSON.parse(this.$route.params.teachers);
+      this.token = this.$route.params.token;
       this.url = getBaseUrl();
-      console.log("end-result-teachers:",this.teachers);
-      console.log("end-result-token:",this.token);
     }
   },
   computed: {
     // 获取当前导师（分页逻辑）
     currentTeacher() {
       this.mentorId = this.teachers[this.currentPage - 1].id;
-      console.log("current-teacher:",this.teachers[this.currentPage - 1]);
-      console.log("current-mentorId:",this.mentorId);
       return this.teachers[this.currentPage - 1]; 
     },
     totalPages() {

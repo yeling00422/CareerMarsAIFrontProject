@@ -28,8 +28,6 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
-
-console.log("api:",api);
 // 请求拦截器添加token
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
@@ -54,8 +52,8 @@ export default {
       try {
         this.startProgressAnimation();
 
-        const resumeText = this.$route.query.resumeText;
-        const userInfo = this.$route.query.userInfo;
+        const resumeText = this.$route.params.resumeText;
+        const userInfo = this.$route.params.userInfo;
 
         const API_PATH = "/ai/match/job";
         const response = await api.post(API_PATH, resumeText, {
@@ -65,7 +63,6 @@ export default {
         });    
 
         const result = response.data;
-        console.log("result:", result);
         clearInterval(this.progressTimer);
         if(result.code !== 200) {
           alert(result.msg || '简历信息有误！请重新输入选择正确的简历文件');
@@ -74,8 +71,8 @@ export default {
         
         if (result.code === 200 || result.code === 0) {
           this.$router.push({
-            path: '/match-job',
-            query: { 
+            name: 'MatchJob',
+            params: { 
               matchJob: JSON.stringify(result.data), 
               resumeText: resumeText,
               userInfo: userInfo

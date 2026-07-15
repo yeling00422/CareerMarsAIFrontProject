@@ -43,9 +43,3 @@ export function getBaseUrl() {
 }
 
 
-
-// export function getAiURL() {
-//   // 临时直接返回测试环境 API 地址，绕过域名判断
-//   return 'http://api-test.careermars-test.cn/api/ai';
-// }
-

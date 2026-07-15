@@ -115,7 +115,7 @@ export default {
       countdown: 60,
       countryDataList: countryList, 
       timer: null, 
-      testReportText: '',  
+      mbtiResultDataStr: '',  
       resumeText: '',  
       positions: [],
       serInfo: null,
@@ -144,45 +144,43 @@ export default {
   },
   methods: {
     loadAnalysisData(){
-      this.testReportText = this.$route.query.testReportText;
-      this.resumeText = this.$route.query.resumeText;
-      this.positions = this.$route.query.positions;
+      this.mbtiResultDataStr = this.$route.params.mbtiResultDataStr;
+      this.resumeText = this.$route.params.resumeText;
     },
     // 补上模板中引用了但没定义的方法
     register() {
-      console.log('点击了注册'); 
       this.$router.push({
-        path: '/register-by-phone-code',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'RegisterByPhoneCode',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
     },
     login() {
-      console.log('点击了密码登录'); 
       this.$router.push({
-        path: '/login-by-phone-password',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'LoginByPhonePassword',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
       },    
     loginByEmail(){
       this.$router.push({
-        path: '/login-by-email-password',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'LoginByEmailPassword',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
     },
-    toDeal() { console.log('点击了用户协议'); },
-    toHide() { console.log('点击了隐私政策'); },
+    toDeal() {
+
+    },
+    toHide() {
+
+    },
     togglePhoneCodeDropdown() {
       this.showPhoneCodeDropdown = !this.showPhoneCodeDropdown;
     },
@@ -223,9 +221,7 @@ export default {
       if (!this.phone){
         alert('请输入手机号!');
         return;
-      } 
-      console.log("this.phone", this.phone);
-      
+      }       
       try {
         const countryNum = this.selectedPhoneCode.replace('+', '');
         const API_PATH = "/login/sendCLoginCodeByPhone";
@@ -234,13 +230,10 @@ export default {
           countryCode: this.selectedCountryCode,
           countryNum: countryNum
         }
-        console.log("countryNum", countryNum);
-        console.log("phoneData", phoneData);
         const response = await api.get(API_PATH, {
             params: phoneData
         });
         const result = response.data;
-        console.log("result", result);
         if (result.code === 200) {
           this.startTimer();
           alert("验证码发送成功!");
@@ -252,7 +245,6 @@ export default {
       }
     },
     async handleLogin() {
-      console.log("handleLogin 方法被调用"); // 添加调试信息
       if (!this.phone || !this.code) return alert('请填写完整信息');
       try {
         const countryNum = this.selectedPhoneCode.replace('+', '');
@@ -262,27 +254,21 @@ export default {
           countryNum: countryNum,
           code: this.code,
         }
-        console.log("countryNum", countryNum);
-        console.log("phoneData", phoneData);
         const response = await api.get(API_PATH, {
             params: phoneData
         });
-        console.log("response", response);
-
         const result = response.data;
         if (result.code === 200) {
           alert('登录成功');
           this.$router.push({
-            path: '/login-success',
-            query: { 
-              testReportText: this.testReportText,
+            name: 'MBTITestEndResult',
+            params: { 
+              mbtiResultDataStr: this.mbtiResultDataStr,
               resumeText: this.resumeText,
-              positions: this.positions,
               userInfo: JSON.stringify(result.data),
             },
           });
         } else {
-          console.log("result", result);
           alert(result.msg);
         }
       } catch (err) {

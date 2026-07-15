@@ -2,39 +2,46 @@
   <div class="loginLoad-page">
     <!-- 报告标题 -->
     <div class="report-head">
-      <p class="head-title">你的性格测试报告</p>
-      <p class="head-desc">ai基于您的答题结果生成</p>
+      <p class="head-title">你的MBTI测试报告</p>
+      <p class="head-desc">基于您的星座与答题结果生成</p>
     </div>
 
     <div class="middle-container">
       <div class="head-div">
-        <span class="report-text">{{this.testReportText}}</span>
+        <div class="mbti-group">{{mbtiResultData.group}}</div>
+        <div class="mbti-name">{{mbtiResultData.name}} {{mbtiResultData.type}}</div>
+        <div class="mbti-description">{{mbtiResultData.description}}</div>
       </div>
-      
-      <div class="position-title" ref="positionTitle">ai推荐岗位<span class="iconfont icon-gongju icon-upgrade"></span></div>
-       <!-- 动态遮罩层：从这里开始往下覆盖到底部 -->
-        <div class="mask-bottom"></div>
 
-      <div class="position-div">
-        <div class="end-box" v-for="(position, index) in positions" :key="index">
-          <div class="first-line">
-            <span class="position-name">{{ position.positionName }}</span>
-            <div class="stars">
-              <span v-for="n in 5" :key="n" class="star" :class="getStarClass(n, position.matchDegree)">
-                <span class="iconfont icon-xingxing star-stroke"></span>
-                <span class="iconfont icon-xingxing star-fill" :style="getStarStyle(n, position.matchDegree)"></span>
-              </span>
-            </div>
-          </div>
-          <div class="position-score">岗位推荐得分：{{ position.matchDegree }}</div>
-          <div class="position-desc">推荐理由：{{ position.reasonsForRecommendation }}</div>
-        </div>
-        </div>
+      <div class="middle-div">
+        <div class="mbti-title" ref="positionTitle">核心优势<span class="iconfont icon-youshi icon-upgrade"></span></div>
+        <div class="mbti-desc" >{{mbtiResultData.advantage}}</div>
+        <div class="mbti-title">明显短板<span class="iconfont icon-duanban2 icon-upgrade"></span></div>
+        <div class="mbti-desc">{{mbtiResultData.disadvantage}}</div>
+        <div class="mbti-title">推荐行业<span class="iconfont icon-hangye icon-upgrade"></span></div>
+        <div class="mbti-desc">首选行业：{{mbtiResultData.firstIndustry}}</div>
+        <div class="mbti-desc">次选行业：{{mbtiResultData.secondIndustry}}</div>
+        <div class="mbti-title">推荐岗位<span class="iconfont icon-gangwei icon-upgrade"></span></div>
+        <div class="mbti-desc">首选岗位：{{mbtiResultData.firstPostion}}</div>
+        <div class="mbti-desc">次选岗位：{{mbtiResultData.secondPostion}}</div>
+        <div class="mbti-title">尽量回避<span class="iconfont icon-huibi icon-upgrade"></span></div>
+        <div class="mbti-desc">{{mbtiResultData.avoid}}</div>
+        <div class="mbti-title">个人成长 & 职场建议<span class="iconfont icon-tousujianyi icon-upgrade"></span></div>
+        <div class="mbti-desc">{{mbtiResultData.suggestion}}</div>
+      </div>
+
+      <div class="foot-div">
+        <div class="foot-desc">本 MBTI 结果仅为性格参考，不代表职业限制，任何人通过学习都可适配不同岗位，仅代表天然优势赛道；
+星座基础分会先天微调四维倾向，同答题答案、不同星座会产出差异化人格结果；
+职场建议仅作为成长参考，可结合自身兴趣、专业、城市需求综合选择行业。</div>
+      </div>
+      <!-- 动态遮罩层：从这里开始往下覆盖到底部 -->
+      <!-- <div class="mask-bottom"></div> -->
     </div>
 
     <div class="button-section">
-      <button class="free-analysis-btn" @click=goNext>登录后查看详情</button>
-      <span class="iconfont icon-denglu"></span>
+      <button class="free-analysis-btn" @click=goNext>继续测试</button>
+      <!-- <span class="iconfont icon-denglu"></span> -->
     </div>
   </div>
 </template>
@@ -60,12 +67,13 @@ api.interceptors.request.use(config => {
 });
 
 export default {
-  name: 'LoginLoad',
+  name: 'MBTITestEndResult',
   data() {
     return {
-      testReportText: '',  
+      // testReportText: '',  
       resumeText: '',  
-      positions: [],
+      mbtiResultData: '',
+      userInfo: null,
     }
   },
 
@@ -132,29 +140,19 @@ export default {
     },
     loadAnalysisData() {
       // 从路由参数中获取数据
-      const testReport = this.$route.params.testReport;
-      // 新增：解析接口返回的JSON数据
-      if (testReport) {
-        try {
-          const resultData = JSON.parse(testReport);
-          this.testReportText = resultData.testReportText;
-          this.resumeText = this.$route.params.resumeText;
-          this.positions = resultData.recommendedPositionList;
-          this.$nextTick(() => {
-            this.setMaskTop()
-          });
-        } catch (error) {
-          console.error("解析analysisResultData失败:", error);
-        }
-      }
+      this.mbtiResultData = JSON.parse(this.$route.params.mbtiResultDataStr);
+      this.resumeText = this.$route.params.resumeText;
+      this.userInfo = this.$route.params.userInfo;
+      this.$nextTick(() => {
+        this.setMaskTop()
+      });
     },
     async goNext() {
       this.$router.push({
-        name: 'LoginByPhonePassword',
+        name: 'MatchJobLoad',
         params: { 
-          testReportText: this.testReportText,
           resumeText: this.resumeText,
-          positions: this.positions,
+          userInfo: this.userInfo,
         },
       });
     }
@@ -210,23 +208,41 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-size: 4rem;
 }
 
 .head-div {
   position: relative;
   height: auto;
   min-height: 30rem;
-  padding: 2rem;
+  padding: 3rem;
   width: 80rem;
   margin-top: 2rem;
   background-color: #646464;
 	border-radius: 5rem;
 	border: #00F5D4 solid 0.5rem;
-}
-
-.report-text{
   font-size: 3.5rem;
   color: #fff;
+}
+
+.mbti-group{
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  font-size: 4.5rem;
+}
+
+.mbti-name{
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  font-size: 4.5rem;
+}
+
+.mbti-description{
+  margin-top: 2rem;
+  font-size: 3.5rem;
 }
 
 .comparison-section {
@@ -242,25 +258,35 @@ export default {
 	text-align: center;
 }
 
-.position-title {
+.middle-div{
+  margin-top: 5rem;
+  padding: 5rem;
+}
+
+.mbti-title {
   position: relative;
-  margin-top: 2rem;
+  margin-bottom: 3rem;
+  display: flex;
+  items-align: center;
+  justify-content: center;
   font-size: 5rem;
   font-weight: bold;
   color: #000;
-  margin-bottom: 3rem;
+}
+
+.mbti-desc {
+  margin-bottom: 5rem;
+	border: #FFCB24 solid 0.5rem;
+  border-radius: 3rem;
+  padding: 3rem;
+  background-color: #9E9E9E;
+  color: #fff;
+  font-size: 4rem;
 }
 
 .icon-upgrade {
-  font-size: 5rem;
-  color: #FFCB24;
+  font-size: 6.5rem;
   margin-left: 2rem;
-}
-
-.position-div {
-  position: relative;
-  width: 85rem;
-	height: auto;
 }
 
 .end-box{
@@ -301,33 +327,18 @@ export default {
 }
 
 .button-section {
-  z-index: 10;
-  margin-left: 22rem;
-  position: relative; 
-  display: flex; 
-  margin-top: 3rem;
-  margin-bottom: 3rem;
-  align-items: center; 
-  border-color: #fff;
-}
-
-.icon-denglu{
-  font-size: 7rem;
-  color: #01F5D4;
-  margin-left: -48rem; 
+  width: 40rem; 
+  margin: 5rem auto;
 }
 
 .free-analysis-btn {
   border: #fff solid 0.5rem;
   background: #595959;
-  width: 50rem; 
+  width: 40rem; 
   height: 10rem; 
   color: white;
-  border-radius: 2.67rem; 
-  font-size: 4.5rem; 
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding-left: 5rem;
+  border-radius: 3rem; 
+  font-size:4rem; 
 }
 
 .star {
@@ -350,6 +361,38 @@ export default {
   z-index: 1; 
   font-size: 5rem;
   -webkit-text-stroke: 0.1rem #fff; 
+}
+
+.icon-youshi{
+  color: green;
+}
+
+.icon-duanban2{
+  color: red;
+}
+
+.icon-hangye{
+  color: green;
+}
+
+.icon-gangwei{
+  color: green;
+}
+
+.icon-huibi{
+  color: red;
+}
+
+.icon-tousujianyi{
+  color: green;
+}
+
+.foot-div{
+  padding:3rem;
+  font-size: 3rem;
+  color:red;
+  position: relative;
+  top: -5rem;
 }
 
 </style>

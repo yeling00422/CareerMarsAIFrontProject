@@ -61,8 +61,6 @@
             <span class="iconfont icon-yanjing" :class="{ 'icon-active': showPassword }" @click="togglePasswordVisibility"></span>
             </div>
           </div>
-          
-          
 
           <div class="hint-right">
             <span class="register-link-text" @click="register"> 注册账号</span>
@@ -116,7 +114,7 @@ export default {
       password: '',
       countdown: 60,
       timer: null, 
-      testReportText: '',  
+      mbtiResultDataStr: '',  
       resumeText: '',  
       positions: [],
       showPassword: false,
@@ -161,50 +159,43 @@ export default {
       this.showPassword = !this.showPassword
     },
     loadAnalysisData(){
-      this.testReportText = this.$route.query.testReportText;
-      this.resumeText = this.$route.query.resumeText;
-      this.positions = this.$route.query.positions;
+      this.mbtiResultDataStr = this.$route.params.mbtiResultDataStr;
+      this.resumeText = this.$route.params.resumeText;
     },
     // 补上模板中引用了但没定义的方法
     register() { 
-      console.log('点击了注册'); 
       this.$router.push({
-        path: '/register-by-email-code',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'RegisterByEmailCode',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
     },
     loginByPhone(){
       this.$router.push({
-        path: '/login-by-phone-password',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'LoginByPhonePassword',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
     },
     loginByPhone(){
       this.$router.push({
-        path: '/login-by-phone-password',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'LoginByPhonePassword',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
     },
     toDeal() {
-       console.log('点击了用户协议'); 
       },
-    toHide() { console.log('点击了隐私政策'); },
+    toHide() {
+      },
     async handleLogin() {
-      console.log("handleLogin 方法被调用"); // 添加调试信息
       if (!this.email || !this.password) return alert('请填写完整信息');
-
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(this.email + this.selectedEmailSuffix)) {
         return alert('邮箱格式不正确，请输入正确的邮箱格式！');
@@ -216,23 +207,19 @@ export default {
           email: this.email + this.selectedEmailSuffix,
           password: this.password,
         }
-        console.log("emailData", emailData);
         const response = await api.post(API_PATH, emailData);
-        console.log("response", response);
         const result = response.data;
         if (result.code === 200) {
           alert('登录成功');
           this.$router.push({
-            path: '/login-success',
-            query: { 
-              testReportText: this.testReportText,
+            name: 'MBTITestEndResult',
+            params: { 
+              mbtiResultDataStr: this.mbtiResultDataStr,
               resumeText: this.resumeText,
-              positions: this.positions,
               userInfo: JSON.stringify(result.data),
             },
           });
         } else {
-          console.log("result", result);
           alert(result.msg);
         }
       } catch (err) {

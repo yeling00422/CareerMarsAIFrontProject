@@ -1,7 +1,6 @@
 <template>
   <div class="registerByEmailCode-page">
     <div class="title-section">
-      <!-- <div class="title"><span class="login-title">注册</span>账号</div> -->
     </div>
 
     <div class="main-container">
@@ -138,9 +137,9 @@ export default {
   data() {
     return {
       // ✅ 新增
-    selectedEmailSuffix: '@qq.com',
-    showEmailDropdown: false,
-    emailDataList: emailList,
+      selectedEmailSuffix: '@qq.com',
+      showEmailDropdown: false,
+      emailDataList: emailList,
 
       email: '',
       password: '',
@@ -150,7 +149,7 @@ export default {
       countdown: 60,
       countryDataList: countryList, 
       timer: null, 
-      testReportText: '',  
+      mbtiResultDataStr: '',  
       resumeText: '',  
       positions: [],
       showPassword: false,
@@ -200,11 +199,10 @@ export default {
     },
     registerByPhone() {
       this.$router.push({
-        path: '/register-by-phone-code',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'RegisterByPhoneCode',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
     },
@@ -215,24 +213,23 @@ export default {
       }
     },
     loadAnalysisData(){
-      this.testReportText = this.$route.query.testReportText;
-      this.resumeText = this.$route.query.resumeText;
-      this.positions = this.$route.query.positions;
+      this.mbtiResultDataStr = this.$route.params.mbtiResultDataStr;
+      this.resumeText = this.$route.params.resumeText;
     },
     // 补上模板中引用了但没定义的方法
     login() {
-      console.log('点击了返回登录'); 
       this.$router.push({
-        path: '/login-by-email-password',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'LoginByEmailPassword',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
       },    
-    toDeal() { console.log('点击了用户协议'); },
-    toHide() { console.log('点击了隐私政策'); },
+    toDeal() {
+    },
+    toHide() {
+      },
     startTimer() {
       this.isSendingCode = true;
       this.countdown = 60;
@@ -256,7 +253,6 @@ export default {
         alert('请输入邮箱!');
         return;
       } 
-      console.log("this.email", this.email);
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(this.email + this.selectedEmailSuffix)) {
         return alert('邮箱格式不正确，请输入正确的邮箱格式！');
@@ -266,12 +262,10 @@ export default {
         const emailData = {
           email: this.email + this.selectedEmailSuffix,
         }
-        console.log("emailData", emailData);
         const response = await api.get(API_PATH, {
             params: emailData
         });
         const result = response.data;
-        console.log("result", result);
         if (result.code === 200) {
           this.startTimer();
           alert("验证码发送成功!");
@@ -283,7 +277,6 @@ export default {
       }
     },
     async handleRegister() {
-      console.log("handleRegister 方法被调用"); // 添加调试信息
       if (!this.email || !this.code) return alert('请填写完整信息');
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(this.email + this.selectedEmailSuffix)) {
@@ -297,16 +290,11 @@ export default {
           password: this.password,
           confirmPassword: this.confirmPassword,
         }
-        console.log("emailData", emailData);
         const response = await api.post(API_PATH,emailData);
-        console.log("response", response);
-
         const result = response.data;
         if (result.code === 200) {
-          console.log("result", result);
           alert('注册成功');
         } else {
-          console.log("result", result);
           alert(result.msg);
         }
       } catch (err) {

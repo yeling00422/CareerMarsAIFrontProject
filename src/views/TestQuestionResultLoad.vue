@@ -29,18 +29,6 @@
         <div class="step-circle">{{ step.completed ? '✓' : index + 1 }}</div>
         <div class="step-label">{{ step.label }}</div>
         </div>
-        <!-- <div class="progress-step" ref="step1">
-          <div class="step-circle">1</div>
-          <div class="step-label">正在评估答题质量...</div>
-        </div>
-        <div class="progress-step" ref="step2">
-          <div class="step-circle">2</div>
-          <div class="step-label">正在计算匹配度分数...</div>
-        </div>
-        <div class="progress-step" ref="step3">
-          <div class="step-circle">3</div>
-          <div class="step-label">正在生成提升建议...</div>
-        </div> -->
       </div>
   </div>
 </template>
@@ -93,25 +81,16 @@ export default {
       });
     },
     async loadData(){
-      // 初始化steps数组
-      // this.steps[0].element = this.$refs.step1;
-      // this.steps[1].element = this.$refs.step2;
-      // this.steps[2].element = this.$refs.step3;
       // 开始步骤动画
       this.startStepAnimation();
       // 同时启动进度条动画
       this.startProgressAnimation();
-      const position = this.$route.query.position;
-      const interviewScore = this.$route.query.interviewScore;
-      const resumeText = this.$route.query.resumeText;
-      const userInfo = this.$route.query.userInfo;
+      const position = this.$route.params.position;
+      const interviewScore = this.$route.params.interviewScore;
+      const resumeText = this.$route.params.resumeText;
+      const userInfo = this.$route.params.userInfo;
       let personalAbility = null;
-
-      console.log("test-question-result-load:position:",position);
-      console.log("test-question-result-load:interviewScore:",interviewScore);
-
       try {
-        // console.log("test-question-result-load:resumeText:",interviewScore);
         const response = await api.post(
           "/ai/generate/personalAbility",
           String(resumeText),
@@ -123,21 +102,13 @@ export default {
         );
 
         const result = response.data;
-        console.log("生成个人能力图接口返回结果:", result);
-
         if (result.code === 200 && result.data.personalAbility.length > 0
         ) {
-          console.log("personalAbility1:", personalAbility);
           personalAbility = result.data.personalAbility.slice();
-          console.log("personalAbility2:", personalAbility);
         }
       } catch (error) {
-        console.error("重新生成个人能力图失败", error);
         alert('个人能力图生成失败，请稍后重试！');
       }
-
-
-      // console.log("test-question-result-load:resumeText:",resumeText);
       try {
         const API_PATH = "/ai/testQuestion/result";
         const data = {
@@ -145,17 +116,13 @@ export default {
           position: position,
         }
         const response = await api.post(API_PATH,data);
-        console.log("接口调用成功，返回的数据是：", response);
         // 处理后端返回的Result结构
         const result = response.data;
-        console.log("result：", result);
-        console.log("result.code:", result.code);
-        console.log("result.data：", result.data);
         clearInterval(this.progressTimer);
         if (result.code === 200 || result.code === 0) {
           this.$router.push({
-            path: '/test-question-result',
-            query: { 
+            name: 'TestQuestionResult',
+            params: { 
               testQuestionResultData: JSON.stringify(result.data),
               interviewScore: interviewScore,
               position: position, 

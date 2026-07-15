@@ -113,19 +113,15 @@ export default {
     },
     loadAnalysisData() {
       // 从路由参数中获取数据
-      this.testReportText = this.$route.query.testReportText;
-      this.resumeText = this.$route.query.resumeText;
-      this.positions = this.$route.query.positions;
-      this.userInfo = this.$route.query.userInfo;
-      // console.log("login-success-questions:", this.testReportText);
-      // console.log("login-success-resume:", this.resumeText);
-      console.log("login-success-positions:", this.positions);
-      console.log("login-success-userInfo:", this.userInfo);
+      this.testReportText = this.$route.params.testReportText;
+      this.resumeText = this.$route.params.resumeText;
+      this.positions = this.$route.params.positions;
+      this.userInfo = this.$route.params.userInfo;
     },
     async goNext() {
       this.$router.push({
-        path: '/match-job-load',
-        query: { 
+        name: 'MatchJobLoad',
+        params: { 
           resumeText: this.resumeText,
           userInfo: this.userInfo,
         },

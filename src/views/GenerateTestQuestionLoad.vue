@@ -28,18 +28,6 @@
         <div class="step-circle">{{ step.completed ? '✓' : index + 1 }}</div>
         <div class="step-label">{{ step.label }}</div>
         </div>
-        <!-- <div class="progress-step" ref="step1">
-          <div class="step-circle">1</div>
-          <div class="step-label">正在解析简历核心经历...</div>
-        </div>
-        <div class="progress-step" ref="step2">
-          <div class="step-circle">2</div>
-          <div class="step-label">正在匹配岗位技术要求...</div>
-        </div>
-        <div class="progress-step" ref="step3">
-          <div class="step-circle">3</div>
-          <div class="step-label">正在生成场景化问题...</div>
-        </div> -->
       </div>
   </div>
 </template>
@@ -106,12 +94,10 @@ export default {
           // 同时启动进度条动画
           this.startProgressAnimation();
           // 从路由参数中获取数据
-          const jobId = this.$route.query.jobId;
-          const position = this.$route.query.position;
-          const resumeText = this.$route.query.resumeText;
-          const userInfo = this.$route.query.userInfo;
-          console.log("正在调用后端接口");
-          
+          const jobId = this.$route.params.jobId;
+          const position = this.$route.params.position;
+          const resumeText = this.$route.params.resumeText;
+          const userInfo = this.$route.params.userInfo;          
           const API_PATH =  "/ai/generate/testQuestion";
           const response = await api.get(API_PATH, {
             params: {
@@ -120,15 +106,12 @@ export default {
             }
           });
           const result = response.data;
-          console.log("result：", result);
-          console.log("result.code:", result.code);
-          console.log("result.data：", result.data);
           clearInterval(this.progressTimer);
           clearTimeout(this.timeoutTimer);
           if (result.code === 200 || result.code === 0) {
             this.$router.push({
-              path: '/test-question',
-              query: { 
+              name: 'TestQuestion',
+              params: { 
                 testQuestion: JSON.stringify(result.data), 
                 position: position, 
                 resumeText: resumeText,

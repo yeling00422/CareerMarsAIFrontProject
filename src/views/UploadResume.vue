@@ -1,29 +1,57 @@
 <template>
   <div class="uploadResume-page">
-    <div class="title-div">请上传您的<span class="title-green-text">简历</span></div>
-
-    <input type="file" ref="imageInput" accept="image/*" style="display: none" @change="handleImageChange">
-    <input type="file" ref="pdfInput" accept=".pdf" style="display: none" @change="handlePdfChange">
-    <input type="file" ref="docxInput" accept=".docx" style="display: none" @change="handleDocxChange">
+    <div class="title-div">请      
+      <span class="upload-resume"  @click="triggerUpload"><span class="iconfont icon-shangchuanwenjian"></span>上传简历</span>
+      或填写您的<span class="title-green-text">个人信息</span></div>
+    <input type="file" ref="imageInput" accept="image/*,.pdf,.docx,.doc" style="display: none" @change="handleChange">
     
-    <div class="upload-container">
-      <div class="upload-img" @click="triggerImageUpload">
-        <span class="iconfont icon-shangchuantupian"></span>
-        <span class="upload-text">上传简历图片</span>
+    <div class="middle-container">
+      <div class="name-div">
+        <span class="name-text" >姓名</span>
+        <input type="text" class="input-name" placeholder="   请填写姓名" v-model="formData.name">
       </div>
-      <div class="upload-file" @click="triggerPdfUpload">
-        <span class="iconfont icon-shangchuanwenjian"></span>
-        <span class="upload-text" >上传pdf文件</span>
-      </div>
-      <div class="generate-template" @click="triggerDocxUpload">
-        <span class="iconfont icon-zidongshengcheng"></span>
-        <span class="upload-text">上传docx文件</span>     
-      </div>
-    </div>
 
-    <div class="resume-content">
-      <span class="identification-text">识别出的简历文本:</span>
-      <textarea class="resume-text" v-model="resumeText" readonly></textarea>
+      <div class="date-div">
+        <span class="date-text" >出生日期</span>
+        <input type="date" class="input-date" placeholder="   请选择出生日期" v-model="formData.date">
+      </div>
+
+      <div class="educational-div">
+        <span class="educational-text">最高学历</span>
+        <select class="input-educational" placeholder="请选择学历" v-model="formData.educationalQualifications">
+          <option value="" disabled selected aria-placeholder="">请选择最高学历</option>
+          <option value="其他">其他</option>
+          <option value="专科">专科</option>
+          <option value="本科">本科</option>
+          <option value="硕士">硕士</option>
+          <option value="博士">博士</option>
+        </select>      
+      </div>
+      <div class="school-div">
+        <span class="school-text" >毕业院校</span>
+        <input type="text" class="input-school" placeholder="   请输入毕业院校" v-model="formData.school">
+      </div>
+      <div class="educational-time-div">
+        <span class="educational-time-text" >毕业时间</span>
+        <input type="month" class="input-educational-time" placeholder="   请选择毕业时间" v-model="formData.educationalTime">
+      </div>
+
+
+      <div class="skill-div">
+        <span class="skill-text">专业技能</span>
+        <!-- <input type="text" class="input-skill" placeholder="   请填写专业技能" v-model="formData.skill"> -->
+        <textarea class="input-skill" placeholder="  请填写专业技能" v-model="formData.skill"></textarea>
+      </div>
+
+      <div class="educational-experience-div">
+        <span class="educational-experience-text">教育经历</span>
+        <textarea class="input-educational-experience" placeholder="  请填写教育经历" v-model="formData.educationalExperience"></textarea>
+      </div>
+
+      <div class="job-experience-div">
+        <span class="job-experience-text">工作经历</span>
+        <textarea class="input-job-experience" placeholder="  请填写工作经历" v-model="formData.jobExperience"></textarea>
+      </div>
     </div>
 
     <div class="hint-div">
@@ -33,8 +61,7 @@
 
 
     <div class="btn-div">
-      <button class="free-analysis-btn" @click="handleNoResume">没有简历<span class="iconfont icon-sanjiaoxing"></span></button>
-      <button class="free-analysis-btn" @click="handleNext">下一步：解析简历文件<span class="iconfont icon-sanjiaoxing"></span></button>
+      <button class="free-analysis-btn" @click="handleNext">下一步<span class="iconfont icon-sanjiaoxing"></span></button>
     </div>
   </div>
 </template>
@@ -55,50 +82,59 @@ export default {
   data() {
     return {
       isAgree: false, 
-      resumeText: null,
+      showTip: false,  // 错误提示是否显示，默认隐藏
+      constellation: '', // 新增：当前星座
+      formData: {
+        name: '',
+        date: '', 
+        educationalQualifications: '',
+        school: '', 
+        educationalTime: '', 
+        skill: '',
+        educationalExperience: '',
+        jobExperience: ''
+      }
+    }
+  },
+  watch: {
+    'formData.date'(val) {
+      if (!val) {
+        this.constellation = '';
+        return;
+      }
+      // val格式 yyyy-MM-dd
+      const [year, month, day] = val.split('-').map(Number);
+      this.constellation = this.getConstellation(month, day);
     }
   },
   methods: {
+    // 根据年月日获取星座
+    getConstellation(month, day) {
+      if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return '水瓶座';
+      if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return '双鱼座';
+      if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return '白羊座';
+      if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return '金牛座';
+      if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return '双子座';
+      if ((month === 6 && day >= 21) || (month === 7 && day <= 20)) return '巨蟹座';
+      if ((month === 7 && day >= 21) || (month === 8 && day <= 20)) return '狮子座';
+      if ((month === 8 && day >= 21) || (month === 9 && day <= 20)) return '处女座';
+      if ((month === 9 && day >= 21) || (month === 10 && day <= 20)) return '天秤座';
+      if ((month === 10 && day >= 21) || (month === 11 && day <= 21)) return '天蝎座';
+      if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return '射手座';
+      return '摩羯座'; // 12.22-1.19
+    },
+
+
     // --- 1. 触发选择框 ---
-    triggerImageUpload() { this.$refs.imageInput.click(); },
-    triggerPdfUpload() { this.$refs.pdfInput.click(); },
-    triggerDocxUpload() { this.$refs.docxInput.click(); },
+    triggerUpload() { this.$refs.imageInput.click(); },
 
-    // --- 2. 这里的函数名必须和 template 里的 @change 一致 ---
-    async handleImageChange(event) {
+    async handleChange(event) {
       const file = event.target.files[0];
-      if (!file.type.startsWith('image/')) {
-        alert('只能上传图片文件!');
-      }
-      const maxSize = 5 * 1024 * 1024;
-      if (file.size > maxSize) {
-        alert('图片大小不能超过 5MB');
-      }
-      if (file) await this.uploadFile(file, "/ai/parse/image");
+      if (file) await this.uploadFile(file, "ai/parse/resume/file");
       event.target.value = ''; 
-      console.log("file:", this.file);
-    },
-
-    async handlePdfChange(event) {
-      const file = event.target.files[0];
-      if (!file.type.endsWith('application/pdf')) {
-        alert('只能上传PDF文件!');
-      }
-      if (file) await this.uploadFile(file, "/ai/parse/pdf");
-      event.target.value = ''; 
-      console.log("file:", file);
-    },
-    async handleDocxChange(event) {
-      const file = event.target.files[0];
-      if (!file.type.endsWith('application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
-        alert('只能上传DOCX文件!');
-      }
-      if (file) await this.uploadFile(file, "/ai/parse/docx");
-      event.target.value = ''; 
-      console.log("file:", file);
     },
     async uploadFile(file, url) {
-      this.resumeText = '';
+      alert('正在解析简历，请稍候。。。');
       const formData = new FormData();
       formData.append('file', file); // ✅ 参数名必须是 file
       try {
@@ -107,33 +143,62 @@ export default {
         });
 
         const result = response.data;
-        console.log("接口的getAiURL：", getAiURL());
-        console.log("接口的url：", url);
-        console.log("接口响应结果：", result);
-
         if (result.code === 200 || result.code === 0) {
-          this.resumeText = result.data;
-          console.log("解析后的简历文本内容：", this.resumeText);
-          alert('解析成功，已自动填充简历信息');
+          const data = result.data;
+          // 逐个回填表单
+          this.formData.name = data.name || '';
+          this.formData.date = data.date || '';
+          this.formData.educationalQualifications = data.educationalQualifications || '';
+          this.formData.school = data.school || '';
+          this.formData.educationalTime = data.educationalTime || '';
+          this.formData.skill = data.skill || '';
+          this.formData.educationalExperience = data.educationalExperience || '';
+          this.formData.jobExperience = data.jobExperience || '';
+          alert('解析成功，已自动填充表单信息');
         } else {
-          this.resumeText = ''; // 失败则清空提示
           alert(result.msg || '解析失败');
         }
       } catch (error) {
-        this.resumeText = '';
         console.error("上传失败详情：", error);
         alert('网络错误，请检查后端服务是否开启');
       }
     },
 
-    // --- 其他逻辑 ---
     validateForm() {
-      if (!this.isAgree) {
-        alert('请先勾选同意服务条款及隐私协议');
+      if (!this.formData.name || this.formData.name.trim() === '') {
+        alert('请填写姓名！');
         return false;
       }
-      if (this.resumeText === null || this.resumeText.trim() === '') {
-        alert('请先上传简历文件');
+      if (!this.formData.date || this.formData.date.trim() === '') {
+        alert('请选择出生日期！');
+        return false;
+      }
+      if (!this.formData.educationalQualifications || this.formData.educationalQualifications.trim() === '') {
+        alert('请选择最高学历！');
+        return false;
+      }
+      if (!this.formData.school || this.formData.school.trim() === '') {
+        alert('请填写毕业院校！');
+        return false;
+      }
+      if (!this.formData.educationalTime || this.formData.educationalTime.trim() === '') {
+        alert('请填写毕业时间！');
+        return false;
+      }
+      if (!this.formData.skill || this.formData.skill.trim() === '') {
+        alert('请填写专业技能！');
+        return false;
+      }
+      if (!this.formData.educationalExperience || this.formData.educationalExperience.trim() === '') {
+        alert('请填写教育经历！');
+        return false;
+      }
+      if (!this.formData.jobExperience || this.formData.jobExperience.trim() === '') {
+        alert('请填写工作经历！');
+        return false;
+      }
+      if (!this.isAgree) {
+        alert('请勾选同意服务条款及隐私协议！');
         return false;
       }
       return true;
@@ -142,21 +207,46 @@ export default {
     async handleNext() {
       if (!this.validateForm()) return;
       alert('正在分析解析的简历文本是否合法，请稍候。。。');
-      const requestData = await api.post("/ai/judgment/resume", this.resumeText, {
+      const resumeText =  `
+        【姓名】${this.formData.name}
+        【出生日期】${this.formData.date}
+        【最高学历】${this.formData.educationalQualifications}
+        【毕业院校】${this.formData.school}
+        【毕业时间】${this.formData.educationalTime}
+        【专业技能】${this.formData.skill}
+        【教育经历】${this.formData.educationalExperience}
+        【工作经历】${this.formData.jobExperience}`.trim();
+    
+      const judgmentResumeRequestData = await api.post("/ai/judgment/resume", resumeText, {
         headers: {
           'Content-Type': 'text/plain;charset=UTF-8'
         }
       });      
-      const result = requestData.data;
-      console.log("result:", result);
-      if(result.code !== 200) {
-        alert(result.msg || '简历信息有误！请重新输入选择正确的简历文件');
+      const judgmentResumeResult = judgmentResumeRequestData.data;
+      if(judgmentResumeResult.code !== 200) {
+        alert(judgmentResumeResult.msg || '表单信息不合法！请重新填写表单中的简历信息！');
         return;
       }
 
+      const mbtiRequest = await api.get("/ai/search/mbti/content", {
+        params: {
+          constellation: this.constellation
+        }
+      });      
+      const mbtiRequestData = mbtiRequest.data;
+
+      if(mbtiRequestData.code !== 200) {
+        alert(mbtiRequestData.msg);
+        return;
+      }
+      const mbtiData = mbtiRequestData.data;
       this.$router.push({
-        path: '/analysis-resume',
-        query: { resumeText: this.resumeText },
+        name: 'MBTITestQuestion', // 写路由name，不能写path
+        params: { 
+          constellationFoundationScore: JSON.stringify(mbtiData.constellationFoundationScore),
+          mbtiQuestionList: JSON.stringify(mbtiData.mbtiQuestionList),
+          resumeText: resumeText 
+        },
       });
     },
     handleNoResume() {
@@ -170,12 +260,10 @@ export default {
 <style scoped>
 
 .title-div{
-  position: relative;
-  top: 15rem;
-  left: 30rem;
-  font-size: 6rem;
+  margin-top: 12rem;
+  text-align: center;
+  font-size: 5rem;
   color: #000;
-  margin-bottom: 10rem;
 }
 
 .title-green-text{
@@ -205,17 +293,15 @@ export default {
   align-self: center;
 }
 
-.icon-shangchuantupian,
-.icon-shangchuanwenjian,
-.icon-zidongshengcheng{
-  font-size: 5rem;
-  margin-right: 1rem;
-  color: #fff;
-  margin-top: 1rem;
+.icon-shangchuanwenjian{
+  position: relative;
+  top: 0.8rem;
+  font-size: 7.5rem;
+  color: #00F5D4;
 }
 
-.upload-text{
-  font-size: 3rem;
+.upload-resume{
+  font-size: 5rem;
   color: #00F5D4;
   margin-top: 1.5rem;
 }
@@ -224,7 +310,6 @@ export default {
   position: relative;
   left: 10rem;
   display: flex;
-  top: 20rem;
   width: 78rem;
   margin-top: 10rem;
 }
@@ -249,7 +334,6 @@ export default {
 
 .btn-div{
   position: relative;
-  top: 18rem;
   margin-left: 20rem;
 }
 
@@ -265,7 +349,6 @@ export default {
   display: flex;
   justify-content: center;  
   align-items: center;    
-  /* margin-top: 4rem; */
   margin-bottom: 5rem;
 }
 
@@ -323,5 +406,180 @@ export default {
   padding: 2rem;
   font-size: 3rem;
   color: #000;
+}
+
+.middle-container{
+  position: relative;
+  top:4rem;
+  left: 10rem;
+  width: 80rem;
+  height: auto;
+  min-height: 100rem;
+  background-color: #767676;
+  border-radius: 5rem;
+  padding: 8rem 2rem; 
+  box-sizing: border-box; 
+}
+
+.name-div{
+  margin-bottom: 5rem;
+}
+
+.name-text{
+  position: relative;
+  left: 5rem;
+  font-size: 4rem;
+  color: #AAAAAA;
+}
+
+.input-name{
+  position: relative;
+  left: 11rem;
+  width: 55rem;
+  height: 7rem;
+  border-radius: 2rem;
+  border: none;
+}
+
+.date-div{
+  margin-bottom: 5rem;
+}
+.date-text{
+  position: relative;
+  font-size: 4rem;
+  color: #AAAAAA;
+}
+
+.input-date{
+  position: relative;
+  left: 3rem;
+  width: 55rem;
+  height: 7rem;
+  border-radius: 2rem;
+  border: none;
+}
+
+.school-div{
+  margin-bottom: 5rem;
+}
+.school-text{
+  position: relative;
+  font-size: 4rem;
+  color: #AAAAAA;
+}
+
+.input-school{
+  position: relative;
+  left: 3rem;
+  width: 55rem;
+  height: 7rem;
+  border-radius: 2rem;
+  border: none;
+}
+
+.educational-time-div{
+  margin-bottom: 5rem;
+}
+.educational-time-text{
+  position: relative;
+  font-size: 4rem;
+  color: #AAAAAA;
+}
+
+.input-educational-time{
+  position: relative;
+  left: 3rem;
+  width: 55rem;
+  height: 7rem;
+  border-radius: 2rem;
+  border: none;
+}
+
+.educational-div{
+  margin-top: 5rem;
+}
+
+.input-educational{
+  position: relative;
+  left: 3rem;
+  width: 56rem ;
+  height: 8rem;
+  border-radius: 2rem;
+  border: none;
+  padding-left: 2rem;
+}
+
+.educational-div{
+  margin-bottom: 5rem;
+}
+
+.educational-text{
+  font-size: 4rem;
+  color: #AAAAAA;
+}
+
+.skill-div{
+  margin-top: 5rem;
+}
+
+.input-skill{
+  position: relative;
+  left: 3rem;
+  width: 55rem;
+  height: auto;
+  min-height: 20rem;
+  border-radius: 2rem;
+  border: none;
+}
+
+.skill-text{
+  position: relative;
+  top: -16rem;
+  font-size: 4rem;
+  color: #AAAAAA;
+}
+
+.educational-experience-div{
+  position: relative;
+  margin-top: 5rem;
+}
+
+.input-educational-experience{
+  position: relative;
+  left: 19rem;
+  width: 55rem;
+  height: auto;
+  min-height: 20rem;
+  border-radius: 2rem;
+  border: none;
+}
+
+.educational-experience-text{
+  position: absolute;
+  top: 0rem;
+  font-size: 4rem;
+  color: #AAAAAA;
+}
+
+.job-experience-div{
+  position: relative;
+  margin-top: 5rem;
+}
+
+.input-job-experience{
+  position: relative;
+  left: 19rem;
+  width: 55rem;
+  height: auto;
+  min-height: 20rem;  
+  border-radius: 2rem;
+  border: none;
+}
+
+.job-experience-text{
+  position: absolute;
+  top: 0rem;
+  font-size: 4rem;
+  color: #AAAAAA;
 }
 </style>

@@ -2,34 +2,34 @@
   <div class="loginLoad-page">
     <!-- 报告标题 -->
     <div class="report-head">
-      <p class="head-title">你的性格测试报告</p>
-      <p class="head-desc">ai基于您的答题结果生成</p>
+      <p class="head-title">你的MBTI测试报告</p>
+      <p class="head-desc">基于您的星座与答题结果生成</p>
     </div>
 
     <div class="middle-container">
       <div class="head-div">
-        <span class="report-text">{{this.testReportText}}</span>
+        <div class="mbti-group">{{mbtiResultData.group}}</div>
+        <div class="mbti-name">{{mbtiResultData.name}} {{mbtiResultData.type}}</div>
+        <div class="mbti-description">{{mbtiResultData.description}}</div>
       </div>
-      
-      <div class="position-title" ref="positionTitle">ai推荐岗位<span class="iconfont icon-gongju icon-upgrade"></span></div>
-       <!-- 动态遮罩层：从这里开始往下覆盖到底部 -->
-        <div class="mask-bottom"></div>
-
-      <div class="position-div">
-        <div class="end-box" v-for="(position, index) in positions" :key="index">
-          <div class="first-line">
-            <span class="position-name">{{ position.positionName }}</span>
-            <div class="stars">
-              <span v-for="n in 5" :key="n" class="star" :class="getStarClass(n, position.matchDegree)">
-                <span class="iconfont icon-xingxing star-stroke"></span>
-                <span class="iconfont icon-xingxing star-fill" :style="getStarStyle(n, position.matchDegree)"></span>
-              </span>
-            </div>
-          </div>
-          <div class="position-score">岗位推荐得分：{{ position.matchDegree }}</div>
-          <div class="position-desc">推荐理由：{{ position.reasonsForRecommendation }}</div>
-        </div>
-        </div>
+      <!-- 动态遮罩层：从这里开始往下覆盖到底部 -->
+      <div class="mask-bottom"></div>
+      <div class="middle-div">
+        <div class="mbti-title" ref="positionTitle">核心优势<span class="iconfont icon-youshi icon-upgrade"></span></div>
+        <div class="mbti-desc" >{{mbtiResultData.advantage}}</div>
+        <div class="mbti-title">明显短板<span class="iconfont icon-duanban2 icon-upgrade"></span></div>
+        <div class="mbti-desc">{{mbtiResultData.disadvantage}}</div>
+        <div class="mbti-title">推荐行业<span class="iconfont icon-hangye icon-upgrade"></span></div>
+        <div class="mbti-desc">首选行业：{{mbtiResultData.firstIndustry}}</div>
+        <div class="mbti-desc">次选行业：{{mbtiResultData.secondIndustry}}</div>
+        <div class="mbti-title">推荐岗位<span class="iconfont icon-gangwei icon-upgrade"></span></div>
+        <div class="mbti-desc">首选岗位：{{mbtiResultData.firstPostion}}</div>
+        <div class="mbti-desc">次选岗位：{{mbtiResultData.secondPostion}}</div>
+        <div class="mbti-title">尽量回避<span class="iconfont icon-huibi icon-upgrade"></span></div>
+        <div class="mbti-desc">{{mbtiResultData.avoid}}</div>
+        <div class="mbti-title">个人成长 & 职场建议<span class="iconfont icon-tousujianyi icon-upgrade"></span></div>
+        <div class="mbti-desc">{{mbtiResultData.suggestion}}</div>
+      </div>
     </div>
 
     <div class="button-section">
@@ -60,12 +60,11 @@ api.interceptors.request.use(config => {
 });
 
 export default {
-  name: 'LoginLoad',
+  name: 'MBTITestResult',
   data() {
     return {
-      testReportText: '',  
       resumeText: '',  
-      positions: [],
+      mbtiResultData: '',
     }
   },
 
@@ -75,24 +74,25 @@ export default {
   },
   methods: {
     setMaskTop() {
-      const el = this.$refs.positionTitle
-      if (!el) return
-      // 1. 获取元素相对于父容器 .middle-container 的高度（px）
-      const rect = el.getBoundingClientRect()
-      const parentRect = el.parentElement.getBoundingClientRect()
-      const relativeTop = rect.top - parentRect.top
-      
-      // 2. 加上标题自身高度 + 间距，确保标题完全露出
-      const titleHeight = rect.height
-      const finalTopPx = relativeTop + titleHeight 
-      
-      // 3. 换算成 rem（用项目真实根字体，100% 适配）
-      const remBase = parseFloat(document.documentElement.style.fontSize)
-      const finalTopRem = finalTopPx / remBase
-      
-      // 4. 设置遮罩位置
-      document.documentElement.style.setProperty('--mask-top', finalTopRem + 'rem')
-    },
+  const el = this.$refs.positionTitle
+  if (!el) return
+  const parent = el.closest('.middle-container')
+  const rect = el.getBoundingClientRect()
+  const parentRect = parent.getBoundingClientRect()
+
+  // 元素相对父容器的顶部距离
+  let relativeTop = rect.top - parentRect.top
+  // 加上标题自身高度，让遮罩在标题完全下面
+  relativeTop += rect.height
+  // 额外加一点间距，避免紧贴标题
+  relativeTop += 0
+
+  // rem 换算
+  const remBase = parseFloat(document.documentElement.style.fontSize)
+  const finalTopRem = relativeTop / remBase
+
+  document.documentElement.style.setProperty('--mask-top', finalTopRem + 'rem')
+},
     getStarClass(index, matchDegree) {
       const starCount = matchDegree / 20; // 100 → 5, 90 → 4.5
       const starValue = index;
@@ -132,14 +132,12 @@ export default {
     },
     loadAnalysisData() {
       // 从路由参数中获取数据
-      const testReport = this.$route.params.testReport;
+      const mbtiResultDataStr = this.$route.params.mbtiResultDataStr;
       // 新增：解析接口返回的JSON数据
-      if (testReport) {
+      if (mbtiResultDataStr) {
         try {
-          const resultData = JSON.parse(testReport);
-          this.testReportText = resultData.testReportText;
+          this.mbtiResultData = JSON.parse(mbtiResultDataStr);
           this.resumeText = this.$route.params.resumeText;
-          this.positions = resultData.recommendedPositionList;
           this.$nextTick(() => {
             this.setMaskTop()
           });
@@ -152,9 +150,8 @@ export default {
       this.$router.push({
         name: 'LoginByPhonePassword',
         params: { 
-          testReportText: this.testReportText,
+          mbtiResultDataStr: JSON.stringify(this.mbtiResultData ),
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
     }
@@ -210,24 +207,44 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-size: 4rem;
 }
 
 .head-div {
   position: relative;
   height: auto;
   min-height: 30rem;
-  padding: 2rem;
+  padding: 3rem;
   width: 80rem;
   margin-top: 2rem;
   background-color: #646464;
 	border-radius: 5rem;
 	border: #00F5D4 solid 0.5rem;
-}
-
-.report-text{
   font-size: 3.5rem;
   color: #fff;
 }
+
+.mbti-group{
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  font-size: 4.5rem;
+}
+
+.mbti-name{
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  font-size: 4.5rem;
+}
+
+.mbti-description{
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  font-size: 3.5rem;
+}
+
 
 .comparison-section {
   top: 10rem;
@@ -242,20 +259,38 @@ export default {
 	text-align: center;
 }
 
-.position-title {
+.middle-div{
+  margin-top: 5rem;
+  margin-bottom: 5rem;
+  padding: 5rem;
+}
+
+.mbti-title {
   position: relative;
-  margin-top: 2rem;
+  margin-bottom: 3rem;
+  display: flex;
+  items-align: center;
+  justify-content: center;
   font-size: 5rem;
   font-weight: bold;
   color: #000;
-  margin-bottom: 3rem;
+}
+
+.mbti-desc {
+  margin-bottom: 5rem;
+	border: #FFCB24 solid 0.5rem;
+  border-radius: 3rem;
+  padding: 3rem;
+  background-color: #9E9E9E;
+  color: #fff;
+  font-size: 4rem;
 }
 
 .icon-upgrade {
-  font-size: 5rem;
-  color: #FFCB24;
+  font-size: 6.5rem;
   margin-left: 2rem;
 }
+
 
 .position-div {
   position: relative;
@@ -305,8 +340,8 @@ export default {
   margin-left: 22rem;
   position: relative; 
   display: flex; 
-  margin-top: 3rem;
-  margin-bottom: 3rem;
+  margin-top: 5rem;
+  margin-bottom: 5rem;
   align-items: center; 
   border-color: #fff;
 }
@@ -352,4 +387,27 @@ export default {
   -webkit-text-stroke: 0.1rem #fff; 
 }
 
+.icon-youshi{
+  color: green;
+}
+
+.icon-duanban2{
+  color: red;
+}
+
+.icon-hangye{
+  color: green;
+}
+
+.icon-gangwei{
+  color: green;
+}
+
+.icon-huibi{
+  color: red;
+}
+
+.icon-tousujianyi{
+  color: green;
+}
 </style>

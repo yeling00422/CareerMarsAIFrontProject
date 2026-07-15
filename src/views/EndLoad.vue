@@ -28,18 +28,6 @@
         <div class="step-circle">{{ step.completed ? '✓' : index + 1 }}</div>
         <div class="step-label">{{ step.label }}</div>
         </div>
-        <!-- <div class="progress-step" ref="step1">
-          <div class="step-circle">1</div>
-          <div class="step-label">正在解析简历核心经历...</div>
-        </div>
-        <div class="progress-step" ref="step2">
-          <div class="step-circle">2</div>
-          <div class="step-label">正在加载导师信息...</div>
-        </div>
-        <div class="progress-step" ref="step3">
-          <div class="step-circle">3</div>
-          <div class="step-label">正在匹配合适的导师...</div>
-        </div> -->
       </div>
   </div>
 </template>
@@ -80,6 +68,7 @@ export default {
       progress: 0,
       progressTimer: null,
       stepTimer: null,
+      userInfo: null,
     };
   },
   created() {
@@ -99,31 +88,20 @@ export default {
       // 同时启动进度条动画
       this.startProgressAnimation();
       // 从路由参数中获取数据
-      const resumeText = this.$route.query.resumeText;
-      const position = this.$route.query.position;
-      const userInfo = JSON.parse(this.$route.query.userInfo);
-      const token = userInfo.token;
+      const resumeText = this.$route.params.resumeText;
+      const position = this.$route.params.position;
+      this.userInfo = this.$route.params.userInfo;
+      const userInfoJson = JSON.parse(this.userInfo);
+      const token = userInfoJson.token;
       const url = getBaseUrl();
-      console.log("end-load-resume:",resumeText);
-      console.log("end-load-position:",position);
-      console.log("end-load-userInfo:",userInfo);
-      console.log("end-load-token:",token);
-
-
       try {
         const API_PATH = "/ai/recommendation/mentor";
         const data = {
           resumeText: JSON.stringify(resumeText),
           position: position,
         }
-
         const response = await api.post(API_PATH,data);
-        console.log("推荐导师接口调用成功，返回的数据是：", response);
         const result = response.data;
-        console.log("result：", result);
-        console.log("result.code:", result.code);
-        console.log("result.data：", result.data);
-
         clearInterval(this.progressTimer);
         if (result.code === 200) {
           if (result.data.mentorList.length === 0) {
@@ -142,10 +120,11 @@ export default {
             return;
           }
           this.$router.push({
-            path: '/end-result',
-            query: { 
+            name: 'EndResult',
+            params: { 
               teachers: JSON.stringify(result.data.mentorList),
               token: token,
+              userInfo:this.userInfo,
             },
           });
         } else {
@@ -165,7 +144,6 @@ export default {
       } catch (error) {
         //跳转导师推荐列表页面
         console.error("推荐导师接口调用失败，错误信息是：", error);
-        // window.location.href = url+'/teacher';
       }      
     },
     startProgressAnimation() {
@@ -194,22 +172,18 @@ export default {
     completeCurrentStep() {
       const step = this.steps[this.currentStep];
       if (!step || !step.element) return;
-      
       step.completed = true;
-      
       // 添加completed类来显示绿色√
       const circleElement = step.element.querySelector('.step-circle');
       if (circleElement) {
         circleElement.classList.add('completed');
         circleElement.textContent = '✓'; // 替换数字为对号
-        
         // 添加延迟确保样式生效
         setTimeout(() => {
           circleElement.style.backgroundColor = '#00a896';
           circleElement.style.color = 'white';
         }, 50);
       }
-      
       // 更新标签样式
       const labelElement = step.element.querySelector('.step-label');
       if (labelElement) {

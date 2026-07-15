@@ -109,7 +109,7 @@ export default {
       countdown: 60,
       countryDataList: countryList, 
       timer: null, 
-      testReportText: '',  
+      mbtiResultDataStr: '',  
       resumeText: '',  
       positions: [],
       showPassword: false,
@@ -139,46 +139,43 @@ export default {
       this.showPassword = !this.showPassword
     },
     loadAnalysisData(){
-      this.testReportText = this.$route.query.testReportText;
-      this.resumeText = this.$route.query.resumeText;
-      this.positions = this.$route.query.positions;
+      this.mbtiResultDataStr = this.$route.params.mbtiResultDataStr;
+      this.resumeText = this.$route.params.resumeText;
     },
     // 补上模板中引用了但没定义的方法
     register() { 
-      console.log('点击了注册'); 
       this.$router.push({
-        path: '/register-by-phone-code',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'RegisterByPhoneCode',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
     },
     login() {
-      console.log('点击了验证码登录'); 
       this.$router.push({
-        path: '/login-by-phone-code',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'LoginByPhoneCode',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
     },
     loginByEmail(){
-      console.log("点击了邮箱登录");
       this.$router.push({
-        path: '/login-by-email-password',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'LoginByEmailPassword',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
     },
-    toDeal() { console.log('点击了用户协议'); },
-    toHide() { console.log('点击了隐私政策'); },
+    toDeal() {
+
+    },
+    toHide() { 
+
+    },
     togglePhoneCodeDropdown() {
       this.showPhoneCodeDropdown = !this.showPhoneCodeDropdown;
     },
@@ -198,7 +195,6 @@ export default {
     },
     
     async handleLogin() {
-      console.log("handleLogin 方法被调用"); // 添加调试信息
       if (!this.phone || !this.password) return alert('请填写完整信息');
       try {
         const countryNum = this.selectedPhoneCode.replace('+', '');
@@ -209,25 +205,19 @@ export default {
           countryCode: this.selectedCountryCode,
           password: this.password,
         }
-        console.log("countryNum", countryNum);
-        console.log("phoneData", phoneData);
         const response = await api.post(API_PATH, phoneData);
-        console.log("response", response);
-
         const result = response.data;
         if (result.code === 200) {
           alert('登录成功');
           this.$router.push({
-            path: '/login-success',
-            query: { 
-              testReportText: this.testReportText,
+            name: 'MBTITestEndResult',
+            params: { 
+              mbtiResultDataStr: this.mbtiResultDataStr,
               resumeText: this.resumeText,
-              positions: this.positions,
               userInfo: JSON.stringify(result.data),
             },
           });
         } else {
-          console.log("result", result);
           alert(result.msg);
         }
       } catch (err) {

@@ -15,7 +15,7 @@
           <circle class="progress-ringcircle" :stroke-dasharray="circumference" :stroke-dashoffset="strokeDashoffset"/>
         </svg>
         <p class="score-label">综合评分</p>
-        <p class="score-number"><span class="main-number">{{ avgScore }}</span>%</p>
+        <p class="score-number"><span class="main-number">{{ avgScore }}</span></p>
       </div>
       <!-- 三个小矩形框 -->
       <div class="mini-scores">
@@ -40,7 +40,7 @@
         <div class="mini-score-item">
           <span class="iconfont icon-ceshishenqing"></span>
           <div class="mini-score-value">{{interviewScore }}%</div>
-          <div class="mini-score-label">面试表现</div>
+          <div class="mini-score-label">笔试得分</div>
           <div class="progress-bar">
             <div class="progress-fill" :style="{ width:interviewScore + '%' }"></div>
           </div>
@@ -212,7 +212,6 @@ export default {
   },
   methods: {
     async reGeneratePersonalAbilityChart() {
-      console.log("重新生成个人能力图");
       alert('正在重新生成个人能力图，请稍后...');
       try {
         const response = await api.post(
@@ -226,8 +225,6 @@ export default {
         );
 
         const result = response.data;
-        console.log("接口返回结果:", result);
-
         // ✅ 第一层兜底：接口没返回
         if (!result) {
           alert('个人能力图生成失败！');
@@ -281,34 +278,25 @@ export default {
     loadAnalysisData() {
       // 从路由参数中获取数据
       this.personalAbilityResult = false;
-      this.interviewScore = Number(this.$route.query.interviewScore);
-      const testQuestionResultData = this.$route.query.testQuestionResultData;
-      this.resumeText = this.$route.query.resumeText;
-      this.position = this.$route.query.position;
-      this.userInfo = this.$route.query.userInfo;
-      this.personalAbility = this.$route.query.personalAbility;
+      this.interviewScore = Number(this.$route.params.interviewScore);
+      const testQuestionResultData = this.$route.params.testQuestionResultData;
+      this.resumeText = this.$route.params.resumeText;
+      this.position = this.$route.params.position;
+      this.userInfo = this.$route.params.userInfo;
+      this.personalAbility = this.$route.params.personalAbility;
       if(this.personalAbility !== null && this.personalAbility !== '[]' && this.personalAbility !== undefined && this.personalAbility !== ''){
         this.personalAbilityResult = true;
       }
-      console.log("personalAbilityResult:", this.personalAbilityResult);
-      console.log("personalAbility:", this.personalAbility);
       // 新增：解析接口返回的JSON数据
       if (testQuestionResultData) {
         try {
           const resultData = JSON.parse(testQuestionResultData);
-          console.log("解析后的数据:", resultData);
           // 赋值给对应的字段
           this.culturalCompatibility = resultData.culturalCompatibility;
           this.resumeMatchingScore = resultData.resumeMatchingScore;
           this.overallPerformance = resultData.overallPerformance;
           this.improvements = resultData.improvements;
           this.avgScore = Math.trunc((this.culturalCompatibility + this.resumeMatchingScore + this.interviewScore) / 3);
-          console.log("avgScore:", this.avgScore);
-          console.log("culturalCompatibility:", this.culturalCompatibility);
-          console.log("resumeMatchingScore:", this.resumeMatchingScore);
-          console.log("interviewScore:", this.interviewScore);
-          console.log("overallPerformance:", this.overallPerformance);
-          console.log("improvements:", this.improvements);
         } catch (error) {
           console.error("解析testQuestionResultData失败:", error);
         }
@@ -316,8 +304,8 @@ export default {
     },
     async goNext() {
       this.$router.push({
-        path: '/end-load',
-        query: { 
+        name: 'EndLoad',
+        params: { 
           resumeText: this.resumeText,
           position: this.position,
           userInfo: this.userInfo,

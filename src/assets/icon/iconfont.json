@@ -6,6 +6,48 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "8949009",
+      "name": "岗位",
+      "font_class": "gangwei",
+      "unicode": "e658",
+      "unicode_decimal": 58968
+    },
+    {
+      "icon_id": "10214620",
+      "name": "回避",
+      "font_class": "huibi",
+      "unicode": "e613",
+      "unicode_decimal": 58899
+    },
+    {
+      "icon_id": "12544536",
+      "name": "优势",
+      "font_class": "youshi",
+      "unicode": "e68e",
+      "unicode_decimal": 59022
+    },
+    {
+      "icon_id": "31239771",
+      "name": "投诉建议",
+      "font_class": "tousujianyi",
+      "unicode": "100de",
+      "unicode_decimal": 65758
+    },
+    {
+      "icon_id": "44057636",
+      "name": "短板2",
+      "font_class": "duanban2",
+      "unicode": "e637",
+      "unicode_decimal": 58935
+    },
+    {
+      "icon_id": "1973697",
+      "name": "文件上传",
+      "font_class": "wenjianshangchuan",
+      "unicode": "e614",
+      "unicode_decimal": 58900
+    },
+    {
       "icon_id": "1447756",
       "name": "试卷",
       "font_class": "shijuan",

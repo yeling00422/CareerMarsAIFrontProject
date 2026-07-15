@@ -1,7 +1,6 @@
 <template>
   <div class="registerByPhoneCode-page">
     <div class="title-section">
-      <!-- <div class="title"><span class="login-title">注册</span>账号</div> -->
     </div>
 
     <div class="main-container">
@@ -140,7 +139,7 @@ export default {
       countdown: 60,
       countryDataList: countryList, 
       timer: null, 
-      testReportText: '',  
+      mbtiResultDataStr: '',  
       resumeText: '',  
       positions: [],
       showPassword: false,
@@ -177,33 +176,33 @@ export default {
     },
     registerByEmail() {
       this.$router.push({
-        path: '/register-by-email-code',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'RegisterByEmailCode',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
     },
     loadAnalysisData(){
-      this.testReportText = this.$route.query.testReportText;
-      this.resumeText = this.$route.query.resumeText;
-      this.positions = this.$route.query.positions;
+      this.mbtiResultDataStr = this.$route.params.mbtiResultDataStr;
+      this.resumeText = this.$route.params.resumeText;
     },
     // 补上模板中引用了但没定义的方法
     login() {
-      console.log('点击了返回登录'); 
       this.$router.push({
-        path: '/login-by-phone-password',
-        query: { 
-          testReportText: this.testReportText,
+        name: 'LoginByPhonePassword',
+        params: { 
+          mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
-          positions: this.positions,
         },
       });
       },    
-    toDeal() { console.log('点击了用户协议'); },
-    toHide() { console.log('点击了隐私政策'); },
+    toDeal() {
+
+    },
+    toHide() {
+
+    },
     togglePhoneCodeDropdown() {
       this.showPhoneCodeDropdown = !this.showPhoneCodeDropdown;
     },
@@ -243,9 +242,7 @@ export default {
       if (!this.phone){
         alert('请输入手机号!');
         return;
-      } 
-      console.log("this.phone", this.phone);
-      
+      }       
       try {
         const countryNum = this.selectedPhoneCode.replace('+', '');
         const API_PATH = "/register/sendCRegCodeByPhone";
@@ -254,13 +251,10 @@ export default {
           countryCode: this.selectedCountryCode,
           countryNum: countryNum
         }
-        console.log("countryNum", countryNum);
-        console.log("phoneData", phoneData);
         const response = await api.get(API_PATH, {
             params: phoneData
         });
         const result = response.data;
-        console.log("result", result);
         if (result.code === 200) {
           this.startTimer();
           alert("验证码发送成功!");
@@ -272,7 +266,6 @@ export default {
       }
     },
     async handleRegister() {
-      console.log("handleRegister 方法被调用"); // 添加调试信息
       if (!this.phone || !this.code) return alert('请填写完整信息');
       try {
         const countryNum = this.selectedPhoneCode.replace('+', '');
@@ -285,17 +278,11 @@ export default {
           password: this.password,
           confirmPassword: this.confirmPassword,
         }
-        console.log("countryNum", countryNum);
-        console.log("phoneData", phoneData);
         const response = await api.post(API_PATH,phoneData);
-        console.log("response", response);
-
         const result = response.data;
         if (result.code === 200) {
-          console.log("result", result);
           alert('注册成功');
         } else {
-          console.log("result", result);
           alert(result.msg);
         }
       } catch (err) {
