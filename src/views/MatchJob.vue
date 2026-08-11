@@ -37,7 +37,7 @@
 
       <!-- 底部按钮区 -->
       <div class="buttons-section">
-        <button class="btn btn-start" @click="handleFreeAnalysis">下一步</button>
+        <button class="btn btn-start" @click="handleFreeAnalysis">下一步<span class="iconfont icon-sanjiaoxing"></span></button>
       </div>
     </div>
   </div>
@@ -81,6 +81,7 @@ export default {
       position: '', 
       inputText: '', 
       resumeText: '', 
+      mbtiResult: '', 
       userInfo: null,
     };
   },
@@ -118,6 +119,7 @@ export default {
       // 从路由参数中获取数据
       const matchJob = this.$route.params.matchJob;
       this.resumeText = this.$route.params.resumeText;
+      this.mbtiResult = this.$route.params.mbtiResult;
       this.userInfo = this.$route.params.userInfo;
       if (matchJob) {
         try {
@@ -170,16 +172,13 @@ export default {
         }
       }
 
-      console.log("jobId:", this.jobId);
-      console.log("company:", this.company);  
-      console.log("position:", this.position);
-      console.log("isSelected:", this.isSelect);
       this.$router.push({
         name: 'GenerateTestQuestionLoad',
         params: { 
           jobId: this.jobId, 
           position: this.position, 
           resumeText: this.resumeText, 
+          mbtiResult: this.mbtiResult, 
           userInfo: this.userInfo,
         },
       });
@@ -268,12 +267,9 @@ export default {
 .jobs-section {
   position: relative;
   flex-wrap: wrap;
-  /* height: 105rem; */
   height: auto;
   width: 75%;
   margin-left: 16rem;
-  margin-bottom: 15rem;
-  /* background: #333; */
 }
 
 .job-card {
@@ -323,11 +319,11 @@ export default {
 /* 底部按钮 */
 .buttons-section {
   position: relative;
-  top: -10rem;
   display: flex;
   flex-direction: column;/* 底部按钮横向或者纵向 */
   gap: 2rem;
-
+  z-index: 99; /* 最高层级，不会被其他元素遮挡 */
+  margin-bottom: 10rem;
 }
 
 .btn {
@@ -343,14 +339,31 @@ export default {
  color: #fff;
 }
 
+
 .btn-start {
-background: #01F5D4;
- color: #333;
+  color: #fff;
+  background-color: #595959;
+  border: 0.5rem solid #53E4C7;
+  width: 35rem;
+  height: 8rem;
+  border-radius: 5rem;
+  font-size: 4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin:0 auto;
+  padding: 1rem;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  animation: cardGlow 3s ease-in-out infinite;
+}
+
+.btn-start:active {
+  transform: scale(0.96);
 }
 
 .input-div{
   position: relative;
-  top: -15rem;
+  margin-bottom: 6rem; /* 替换 top:-15rem，向下留白，不覆盖按钮 */
 }
 
 .input{
@@ -425,5 +438,10 @@ background: #01F5D4;
   color: #ccc;
 }
 
+.icon-sanjiaoxing {
+  margin-left: 2rem;
+  font-size: 3rem;
+  color: yellow;
+}
 
 </style>

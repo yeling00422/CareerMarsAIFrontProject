@@ -42,10 +42,10 @@
     </div>
     <!-- 提示文字 -->
     <div class="tip-text" :class="{ hidden: selectedOption !== null }">提示：选择最符合你想法的答案</div>
-    <div class="last-button-section" :class="{ hidden: selectedOption === null }">
+    <div class="last-button-section" :class="{ hidden: !allAnswered}">
       <button class="free-analysis-btn prev-btn" @click="lastQuestion">上一题<span class="iconfont icon-sanjiaoxing icon-arrow-left"></span></button>
     </div>
-    <div class="next-button-section" :class="{ hidden: selectedOption === null }">
+    <div class="next-button-section" :class="{ hidden: !allAnswered}">
       <button class="free-analysis-btn next-btn" @click="nextQuestion">{{ currentPage !== totalPages ? '下一题' : '提交' }}<span class="iconfont icon-sanjiaoxing icon-arrow-right" ></span></button>
     </div>
   </div>
@@ -80,12 +80,21 @@ export default {
       fScore:0,
       gScore:0,
       pScore:0,
+      isClickLock: false, // 新增：点击防抖锁
     }
   },
   computed: {
     totalPages() {
       return this.questions.length;
-    }
+    },
+    allAnswered() {
+      const allFilled = this.userAnswers.length === this.totalPages && this.userAnswers.every(item => item != null);
+      const currentHasAnswer = this.userAnswers[this.currentPage - 1] != null;
+      return allFilled && currentHasAnswer;
+
+    // 数组长度等于题目总数，且每一项都不为空
+    // return this.userAnswers.length === this.totalPages && this.userAnswers.every(item => item != null);
+  }
   },
   created() {
     // 组件创建时自动加载数据
@@ -116,11 +125,27 @@ export default {
     },
     
     selectOption(value) {
-      this.selectedOption = value;
-      this.userAnswers[this.currentPage - 1] = value;
+        if(this.isClickLock) return;
+        this.selectedOption = value;
+        // 补齐数组空位，防止长度不足导致allAnswered不生效
+        while (this.userAnswers.length < this.currentPage) {
+          this.userAnswers.push(null);
+        }
+        this.userAnswers[this.currentPage - 1] = value;
+
+        // 非最后一题，1秒自动跳题
+        if (this.currentPage < this.totalPages) {
+          this.isClickLock = true; // 上锁
+          setTimeout(() => {
+            this.currentPage++;
+            this.selectedOption = this.userAnswers[this.currentPage - 1] || null;
+            this.isClickLock = false; // 解锁
+          }, 250);
+        }
     },
     
     lastQuestion() {
+      if(this.isClickLock) return;
       if (this.currentPage > 1) {
         this.currentPage--;
         if (this.userAnswers[this.currentPage - 1]) {
@@ -131,6 +156,7 @@ export default {
       }
     },
     async nextQuestion() {
+      if(this.isClickLock) return;
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
         // 设置当前页面的选中状态
@@ -224,6 +250,7 @@ export default {
             params: { 
               mbtiResultDataStr: JSON.stringify(mbtiResultData),
               resumeText: this.resumeText, 
+              mbtiResult: mbtiResult, 
             }
         });
       }
@@ -342,27 +369,14 @@ export default {
   width: 10rem;
   height: 10rem;
   background-color: #0a21ef;
-  /* display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem; */
 }
 
 .option.selected .option-span {
   color: #666;
 }
 
-.option:hover {
-  background-color: #666;
-}
-
-.option:hover .option-letter {
-  color: #666;
-}
-
 .tip-text {
   margin-top: 5rem;
-  margin-bottom: 5rem;
   text-align: center;
   color: #999;
   padding-top: 5rem 0;
@@ -370,14 +384,14 @@ export default {
 }
 
 .last-button-section {
-  margin-top: -10rem;
+  margin-top: 10rem;
   display: flex;
   justify-content: center;
   align-items: center; 
 }
 
 .next-button-section {
-  margin-top: -20rem;
+  margin-top: 10rem;
   display: flex;
   justify-content: center;
   align-items: center; 
@@ -397,16 +411,25 @@ export default {
 }
 
 .free-analysis-btn {
-  background: #00F5D4;
-  width: 40rem; 
-  height: 7rem; 
-  color: #333030;
-  border: none;
-  border-radius: 2.67rem; 
-  font-size: 4rem; 
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 26rem;
+  color: #fff;
+  background-color: #595959;
+  border: 0.5rem solid #53E4C7;
+  padding-left: 2rem;
+  width: 35rem;
+  height: 8rem;
+  border-radius: 5rem;
+  font-size: 4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin:-2rem auto;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  animation: cardGlow 3s ease-in-out infinite;
+}
+
+
+.free-analysis-btn:active {
+  transform: scale(0.96);
 }
 
 .prev-btn {
@@ -416,6 +439,7 @@ export default {
 
 .next-btn {
   background: #00F5D4;
+  border: 0.5rem solid #fff;
   color: #333;
 }
 

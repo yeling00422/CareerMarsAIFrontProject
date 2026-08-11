@@ -1,9 +1,12 @@
 <template>
   <div class="uploadResume-page">
     <div class="title-div">请      
-      <span class="upload-resume"  @click="triggerUpload"><span class="iconfont icon-shangchuanwenjian"></span>上传简历</span>
+  <span class="upload-box">
+    <span class="iconfont icon-shangchuanwenjian"  @click="triggerUpload">上传文件</span>
+    <!-- <span class="upload-file"  @click="triggerUpload">上传文件</span> -->
+  </span>
       或填写您的<span class="title-green-text">个人信息</span></div>
-    <input type="file" ref="imageInput" accept="image/*,.pdf,.docx,.doc" style="display: none" @change="handleChange">
+    <input type="file" ref="imageInput" style="display: none" @change="handleChange">
     
     <div class="middle-container">
       <div class="name-div">
@@ -56,7 +59,7 @@
 
     <div class="hint-div">
       <input type="checkbox" class="custom-checkbox" id="agree-check" v-model="isAgree">
-      <p class="hint-text">我已阅读并同意<span class="service-text">服务条款</span>和<span class="privacy-text">隐私设置</span>。我理解我的简历数据将被用于AI分析和职业匹配。</p>      
+      <p class="hint-text">我已阅读并同意<span class="service-text" @click="$parent.showDeal = true">[用户协议]</span>和<span class="privacy-text" @click="$parent.showHide = true">[隐私政策]</span>。我理解我的简历数据将被用于AI分析和职业匹配。</p>      
     </div>
 
 
@@ -130,7 +133,18 @@ export default {
 
     async handleChange(event) {
       const file = event.target.files[0];
-      if (file) await this.uploadFile(file, "ai/parse/resume/file");
+        if (!file) return;
+
+      // JS自己校验允许的后缀
+      const allowSuffix = ['pdf','doc','docx','jpg','jpeg','png'];
+      const suffix = file.name.split('.').pop().toLowerCase();
+      if (!allowSuffix.includes(suffix)) {
+        alert('仅支持 pdf / doc / docx / jpg / png 文件');
+        event.target.value = ''; // 清空，否则选同文件不会触发change
+        return;
+      }
+
+      await this.uploadFile(file, "ai/parse/resume/file");
       event.target.value = ''; 
     },
     async uploadFile(file, url) {
@@ -266,6 +280,13 @@ export default {
   color: #000;
 }
 
+.upload-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 2rem; /* 图标和文字间距 */
+  white-space: nowrap; /* 禁止自动换行 */
+  cursor: pointer;
+}
 .title-green-text{
   color: #00F5D4;
 }
@@ -281,29 +302,11 @@ export default {
 
 }
 
-.upload-img,
-.upload-file,
-.generate-template{
-  width: 25rem;
-  height: 8rem;
-  border-radius: 2rem;
-  background-color: #595959;
-  display: flex;
-  justify-content: center;
-  align-self: center;
-}
-
 .icon-shangchuanwenjian{
   position: relative;
-  top: 0.8rem;
-  font-size: 7.5rem;
-  color: #00F5D4;
-}
-
-.upload-resume{
+  top: 0;
   font-size: 5rem;
   color: #00F5D4;
-  margin-top: 1.5rem;
 }
 
 .hint-div{
@@ -334,23 +337,30 @@ export default {
 
 .btn-div{
   position: relative;
-  margin-left: 20rem;
 }
 
-/* 按钮：用 rem 调整尺寸和边距 */
 .free-analysis-btn {
-  background: #01F5D4;
-  color: #595959;
-  width: 60rem; 
-  height: 8rem; 
-  border: none;
-  border-radius: 3rem; 
-  font-size: 4rem; 
+  color: #fff;
+  background-color: #595959;
+  border: 0.5rem solid #53E4C7;
+  width: 40rem;
+  height: 8rem;
+  border-radius: 5rem;
+  font-size: 4rem;
   display: flex;
-  justify-content: center;  
-  align-items: center;    
-  margin-bottom: 5rem;
+  justify-content: center;
+  align-items: center;
+  margin:0 auto;
+  margin-bottom: 10rem;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  animation: cardGlow 3s ease-in-out infinite;
 }
+
+
+.free-analysis-btn:active {
+  transform: scale(0.96);
+}
+
 
 /* 图标：用 rem 调整间距 */
 .icon-sanjiaoxing {
@@ -365,7 +375,7 @@ export default {
   min-width:4rem;
   min-height:4rem;
   appearance: none;
-  border: 0.3rem solid #000;
+  border: 0.5rem solid #000;
   border-radius: 0.8rem;
 }
 
@@ -581,5 +591,25 @@ export default {
   top: 0rem;
   font-size: 4rem;
   color: #AAAAAA;
+}
+
+.upload-file{
+  width: 25rem;
+  height: 8rem;
+  border-radius: 2rem;
+  background-color: #595959;
+  border: 0.5rem solid #53E4C7;
+  color:#fff;
+  display: flex;
+  justify-content: center;
+  align-self: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  animation: cardGlow 3s ease-in-out infinite;
+}
+
+
+.upload-file:active {
+  transform: scale(0.97);
 }
 </style>

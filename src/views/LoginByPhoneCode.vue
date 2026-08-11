@@ -73,8 +73,8 @@
 
           <div class="agreement-text">
             登录 即代表您阅读并同意
-            <span class="link-highlight" @click="toDeal"> [用户协议] </span>
-            <span class="link-highlight" @click="toHide"> [隐私政策] </span>
+            <span class="link-highlight" @click="$parent.showDeal = true"> [用户协议] </span>
+            <span class="link-highlight" @click="$parent.showHide = true"> [隐私政策] </span>
           </div>
           <button class="login-btn">登录</button>
 
@@ -119,6 +119,7 @@ export default {
       resumeText: '',  
       positions: [],
       serInfo: null,
+      mbtiResult: '',
     };
   },
   computed: {
@@ -146,6 +147,7 @@ export default {
     loadAnalysisData(){
       this.mbtiResultDataStr = this.$route.params.mbtiResultDataStr;
       this.resumeText = this.$route.params.resumeText;
+      this.mbtiResult = this.$route.params.mbtiResult;
     },
     // 补上模板中引用了但没定义的方法
     register() {
@@ -154,6 +156,7 @@ export default {
         params: { 
           mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
+          mbtiResult: this.mbtiResult,
         },
       });
     },
@@ -163,6 +166,7 @@ export default {
         params: { 
           mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
+          mbtiResult: this.mbtiResult,
         },
       });
       },    
@@ -172,6 +176,7 @@ export default {
         params: { 
           mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
+          mbtiResult: this.mbtiResult,
         },
       });
     },
@@ -265,6 +270,7 @@ export default {
             params: { 
               mbtiResultDataStr: this.mbtiResultDataStr,
               resumeText: this.resumeText,
+              mbtiResult: this.mbtiResult,
               userInfo: JSON.stringify(result.data),
             },
           });
@@ -276,14 +282,11 @@ export default {
         alert('登录异常！请稍后重试！');
       }
     },
-    // toDeal() { window.open(`${window.location.origin}/deal`); },
-    // toHide() { window.open(`${window.location.origin}/hide`); }
   }
 }
 </script>
 
 <style scoped>
-
 .title-section {
   margin-top: 18rem;
   margin-bottom: 6rem;
@@ -420,6 +423,8 @@ export default {
   text-align: right;
   margin-top: -1rem;
   margin-bottom: 3rem;
+  display: flex;
+  justify-content: space-between;
 }
 
 .login-link-text {
@@ -430,7 +435,6 @@ export default {
 
 .register-link-text {
   position: relative;
-  margin-right: 40rem;
   color: #53E4C7;
   font-size: 3rem;
   text-decoration: none;
@@ -466,11 +470,6 @@ export default {
   margin-left: 3.5rem;
 }
 
-.login-btn:hover {
-  transform: translateY(-1rem);
-  box-shadow: 0 1rem 2rem rgba(83, 228, 199, 0.4);
-}
-
 .login-select{
   margin-bottom: 2rem;
 }
@@ -499,7 +498,7 @@ export default {
 }
 
 .icon-vertical_line{
-  margin: 0 -1rem; 
-}
+  font-size: 4rem;
+  margin: 0 -1rem; }
 
 </style>

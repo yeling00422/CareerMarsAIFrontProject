@@ -40,15 +40,16 @@
     </div>
 
     <!-- 提示文字 -->
-    <div class="tip-text" :class="{ hidden: hasUserAnswered() }">
+    <!-- <div class="tip-text" :class="{ hidden: hasUserAnswered() }">
       {{ getCurrentQuestionType() === 4 ? '提示：请输入正确的答案' : '提示：请选择正确的答案' }}
-    </div>
+    </div> -->
 
     <!-- 按钮区域 -->
-    <div class="button-section" :class="{ hidden: selectedOption === null }">
-      <!-- 上一题 -->
+    <!-- <div class="button-section" :class="{ hidden: selectedOption === null }">
+     
+    </div> -->
+     <!-- 上一题 -->
       <button 
-        v-if="currentPage > 1"
         class="nav-btn prev-btn" 
         @click="lastQuestion"
       >
@@ -62,7 +63,6 @@
       >
         {{ currentPage !== totalPages ? '下一题' : '提交' }}<span class="iconfont icon-sanjiaoxing icon-arrow-right" ></span>
       </button>
-    </div>
   </div>
 </template>
 
@@ -100,6 +100,7 @@ export default {
       const testQuestion = this.$route.params.testQuestion;
       this.position = this.$route.params.position;
       this.resumeText = this.$route.params.resumeText;
+      this.mbtiResult = this.$route.params.mbtiResult;
       this.userInfo = this.$route.params.userInfo;
 
       if (testQuestion) {
@@ -186,6 +187,13 @@ export default {
       }
 
       this.saveUserAnswer();
+
+      // 新增：不是最后一题、不是填空题，选中后自动跳下一题
+      // if(this.currentPage < this.totalPages && type !== 4){
+      //   this.currentPage++;
+      //   this.resetCurrentAnswer();
+      // }
+
     },
 
     saveUserAnswer() {
@@ -282,7 +290,20 @@ export default {
     lastQuestion() {
       if (this.currentPage > 1) {
         this.currentPage--;
-        this.resetCurrentAnswer();
+        // 读取历史答案回填，不清空
+        const history = this.userAnswers[this.currentPage - 1];
+        const type = this.getCurrentQuestionType();
+        this.selectedOption = null;
+        this.selectedOptions = [];
+        this.userFreeTextAnswer = '';
+
+        if (type === 2 && Array.isArray(history)) {
+          this.selectedOptions = [...history];
+        } else if (type === 4) {
+          this.userFreeTextAnswer = history || '';
+        } else {
+          this.selectedOption = history || null;
+        }
       }
     },
 
@@ -294,7 +315,20 @@ export default {
 
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
-        this.resetCurrentAnswer();
+        // 回填历史答案，不清空选中
+        const history = this.userAnswers[this.currentPage - 1];
+        const type = this.getCurrentQuestionType();
+        this.selectedOption = null;
+        this.selectedOptions = [];
+        this.userFreeTextAnswer = '';
+
+        if (type === 2 && Array.isArray(history)) {
+          this.selectedOptions = [...history];
+        } else if (type === 4) {
+          this.userFreeTextAnswer = history || '';
+        } else {
+          this.selectedOption = history || null;
+        }
       } else {
         this.interviewScore = this.calculateTotalScore();
         this.$router.push({
@@ -303,6 +337,7 @@ export default {
             position: this.position,
             interviewScore: this.interviewScore,
             resumeText: this.resumeText,
+            mbtiResult: this.mbtiResult,
             userInfo: this.userInfo,
           }
         });
@@ -409,33 +444,42 @@ export default {
   text-align: center;
   color: #999;
   font-size: 3rem;
+  margin-bottom: 5rem;
 }
 
 .button-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 0 5rem 10rem;
+  /* margin: 0 5rem 10rem; */
 }
 
 .nav-btn {
-  width: 40rem;
+  color: #fff;
+  background-color: #595959;
+  border: 0.5rem solid #53E4C7;
+  width: 35rem;
+  height: 8rem;
+  border-radius: 5rem;
   font-size: 4rem;
-  padding: 2rem 5rem;
-  border: none;
-  border-radius: 2rem;
-  cursor: pointer;
-  margin: 5rem;
-  transition: all 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin:-2rem auto;
+  padding-left: 2rem;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  animation: cardGlow 3s ease-in-out infinite;
 }
 
 .prev-btn {
   background: #aaa;
   color: white;
+  margin-bottom: 7.5rem;
 }
 
 .next-btn {
   background: #00F5D4;
+  border: 0.5rem solid #fff;
   color: #333;
 }
 

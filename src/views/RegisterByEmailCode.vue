@@ -154,6 +154,7 @@ export default {
       positions: [],
       showPassword: false,
       showConfirmPassword: false,
+      mbtiResult: '',
     };
   },
   computed: {
@@ -203,6 +204,7 @@ export default {
         params: { 
           mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
+          mbtiResult: this.mbtiResult,
         },
       });
     },
@@ -215,6 +217,7 @@ export default {
     loadAnalysisData(){
       this.mbtiResultDataStr = this.$route.params.mbtiResultDataStr;
       this.resumeText = this.$route.params.resumeText;
+      this.mbtiResult = this.$route.params.mbtiResult;
     },
     // 补上模板中引用了但没定义的方法
     login() {
@@ -223,6 +226,7 @@ export default {
         params: { 
           mbtiResultDataStr: this.mbtiResultDataStr,
           resumeText: this.resumeText,
+          mbtiResult: this.mbtiResult,
         },
       });
       },    
@@ -302,14 +306,11 @@ export default {
         alert('注册异常');
       }
     },
-    // toDeal() { window.open(`${window.location.origin}/deal`); },
-    // toHide() { window.open(`${window.location.origin}/hide`); }
   }
 }
 </script>
 
 <style scoped>
-
 .title-section {
   margin-top: 18rem;
   margin-bottom: 6rem;

@@ -11,8 +11,28 @@
       <div class="main-score">
         <!-- ★★ 修改1：给svg加上【正确的viewBox】，这是尺寸一致的核心，永不断裂 -->
         <svg class="progress-ring" viewBox="0 0 100 100">
-          <circle class="progress-ringbackground"/>
-          <circle class="progress-ringcircle" :stroke-dasharray="circumference" :stroke-dashoffset="strokeDashoffset"/>
+            <!-- 背景圆环：几何属性写在标签，不用CSS -->
+            <circle 
+              class="progress-ringbackground"
+              cx="50" 
+              cy="50" 
+              r="50"
+              fill="transparent"
+              stroke="#e6e6e6"
+              stroke-width="6"
+            />
+            <!-- 前景进度圆环 -->
+            <circle 
+              class="progress-ringcircle"
+              cx="50" 
+              cy="50" 
+              r="50"
+              fill="transparent"
+              stroke="#00F5D4"
+              stroke-width="6"
+              :stroke-dasharray="circumference" 
+              :stroke-dashoffset="strokeDashoffset"
+            />
         </svg>
         <p class="score-label">综合评分</p>
         <p class="score-number"><span class="main-number">{{ avgScore }}</span></p>
@@ -196,7 +216,7 @@ export default {
         .join(' ');
     },
     circumference() {
-      const radius = 40; 
+      const radius = 50; 
       return Math.PI * radius * 2;
     },
     // 计算前景圆的偏移量，实现进度效果
@@ -281,6 +301,7 @@ export default {
       this.interviewScore = Number(this.$route.params.interviewScore);
       const testQuestionResultData = this.$route.params.testQuestionResultData;
       this.resumeText = this.$route.params.resumeText;
+      this.mbtiResult = this.$route.params.mbtiResult;
       this.position = this.$route.params.position;
       this.userInfo = this.$route.params.userInfo;
       this.personalAbility = this.$route.params.personalAbility;
@@ -307,6 +328,7 @@ export default {
         name: 'EndLoad',
         params: { 
           resumeText: this.resumeText,
+          mbtiResult: this.mbtiResult,
           position: this.position,
           userInfo: this.userInfo,
         },
@@ -353,29 +375,28 @@ export default {
 }
 
 .progress-ring{
-  /* ★★ 修改4：圆环核心样式，固定宽高+居中，所有尺寸大小一致，永不变化 */
-  width: 100%;
-  height: 100%;
+  width: 22rem;   /* 固定宽高，防止塌陷 */
+  height: 22rem;
   margin: 0 auto;
+  overflow: visible; /* 防止旋转裁剪 */
 }
 
 .progress-ringbackground{
-  stroke:#e6e6e6;
+  /* stroke:#e6e6e6;
   stroke-width:1rem;
   fill:transparent;
-  /* ★★ 修改5：cx/cy/r 对应 viewBox 0 0 100 100，圆心永远在正中间，永不偏移 */
   r:40;
   cx:50;
-  cy:50;
+  cy:50; */
 }
 
 .progress-ringcircle{
-  stroke:#00F5D4;
+  /* stroke:#00F5D4;
   stroke-width:1rem;
   fill:transparent;
   r:40;
   cx:50;
-  cy:50;
+  cy:50; */
   /* ★★ 修改6：新增2行，圆环从顶部12点开始，视觉最佳，进度条无错位 */
   transform-origin: 50% 50%;
   transform: rotate(-90deg);
@@ -399,13 +420,14 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 2rem 0;
 }
 
 .score-label {
   position: absolute;
   font-size: 3rem;
   color: #fff;
-  top: 4rem;
+  top: 7rem;
 }
 
 .score-number {
@@ -623,35 +645,40 @@ export default {
 
 /* 按钮区域：用 Flex 布局替代固定 top，避免位置错乱 */
 .button-section {
-  width: 20rem;
-  margin-left: 40rem;
+  width: 35rem;
   position: relative; 
   display: flex; /* 新增：Flex 布局让按钮和图标对齐 */
+  margin:0 auto;
   margin-bottom: 3rem;
   align-items: center; 
 }
 
 /* 图标：用 rem 调整间距 */
 .icon-sanjiaoxing {
-  font-size: 3rem;
-  color: #01F5D4;
-  margin-left: -10rem; /* -50px ÷ 3.75 ≈ -13.33rem */
+  position: relative;
+  font-size: 3.5rem;
+  color: yellow;
+  right: 9rem;
 }
 
 /* 按钮：用 rem 调整尺寸和边距 */
 .free-analysis-btn {
   background: #595959;
-  width: 40rem; 
+  width: 35rem; 
   height: 8rem; 
   color: white;
-  border: none;
-  border-radius: 2.67rem; /* 10px ÷ 3.75 ≈ 2.67rem */
+  border: 0.5rem solid #53E4C7;
+  border-radius: 5rem; 
+  padding-right:3rem;
   font-size: 4rem; 
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-left: -10rem; 
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  animation: cardGlow 3s ease-in-out infinite;
 }
 
 
-
+.free-analysis-btn:active {
+  transform: scale(0.96);
+}
 </style>

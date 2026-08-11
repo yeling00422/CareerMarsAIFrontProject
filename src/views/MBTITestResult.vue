@@ -65,6 +65,7 @@ export default {
     return {
       resumeText: '',  
       mbtiResultData: '',
+      mbtiResult: '',
     }
   },
 
@@ -133,6 +134,7 @@ export default {
     loadAnalysisData() {
       // 从路由参数中获取数据
       const mbtiResultDataStr = this.$route.params.mbtiResultDataStr;
+      this.mbtiResult = this.$route.params.mbtiResult;
       // 新增：解析接口返回的JSON数据
       if (mbtiResultDataStr) {
         try {
@@ -152,6 +154,7 @@ export default {
         params: { 
           mbtiResultDataStr: JSON.stringify(this.mbtiResultData ),
           resumeText: this.resumeText,
+          mbtiResult: this.mbtiResult,
         },
       });
     }
@@ -337,32 +340,39 @@ export default {
 
 .button-section {
   z-index: 10;
-  margin-left: 22rem;
   position: relative; 
   display: flex; 
-  margin-top: 5rem;
-  margin-bottom: 5rem;
   align-items: center; 
   border-color: #fff;
+  margin: 5rem auto;
 }
 
 .icon-denglu{
+  position: relative;
   font-size: 7rem;
   color: #01F5D4;
-  margin-left: -48rem; 
+  right: 69rem;
 }
 
 .free-analysis-btn {
-  border: #fff solid 0.5rem;
+  border: 0.5rem solid #53E4C7;
+  transition: transform 0.15s ease, 
+  box-shadow 0.2s ease;
+  animation: cardGlow 3s ease-in-out infinite;
   background: #595959;
   width: 50rem; 
   height: 10rem; 
   color: white;
-  border-radius: 2.67rem; 
+  border-radius: 5rem; 
   font-size: 4.5rem; 
   cursor: pointer;
   transition: all 0.3s ease;
   padding-left: 5rem;
+  margin: 0 auto;
+}
+
+.free-analysis-btn:active {
+  transform: scale(0.96);
 }
 
 .star {

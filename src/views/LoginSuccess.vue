@@ -132,7 +132,6 @@ export default {
 </script>
 
 <style scoped>
-
 .report-head {
   position: relative;
   text-align: center;

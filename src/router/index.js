@@ -8,7 +8,6 @@ import LoginByPhoneCode from '../views/LoginByPhoneCode.vue'
 import LoginByPhonePassword from '../views/LoginByPhonePassword.vue'
 import LoginByEmailPassword from '../views/LoginByEmailPassword.vue'
 import LoginSuccess from '../views/LoginSuccess.vue'
-
 import RegisterByPhoneCode from '../views/RegisterByPhoneCode.vue'
 import RegisterByEmailCode from '../views/RegisterByEmailCode.vue'
 import MatchJobLoad from '../views/MatchJobLoad.vue'
@@ -22,6 +21,7 @@ import EndResult from '../views/EndResult.vue'
 import MBTITestQuestion from '../views/MBTITestQuestion.vue'
 import MBTITestResult from '../views/MBTITestResult.vue'
 import MBTITestEndResult from '../views/MBTITestEndResult.vue'
+import AllMentorResult from '../views/AllMentorResult.vue'
 
 
 Vue.use(VueRouter)
@@ -49,6 +49,7 @@ const routes = [
   { path: '/mbti-test-question', name: 'MBTITestQuestion', component: MBTITestQuestion },
   { path: '/mbti-test-result', name: 'MBTITestResult',component: MBTITestResult },
   { path: '/mbti-test-end-result',name: 'MBTITestEndResult', component: MBTITestEndResult },
+  { path: '/all-mentor-result',name: 'AllMentorResult', component: AllMentorResult },
 ]
 
 const router = new VueRouter({

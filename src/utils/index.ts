@@ -12,7 +12,7 @@ export function getIp() {
 export function getAiURL() {
   const hostname = window.location.hostname;
   if (hostname === 'www.careermars-test.cn') {
-    return 'http://api-test.careermars-test.cn/api';
+    return 'https://api-test.careermars-test.cn/api';
   } else if (hostname === 'www.careermars.cn') {
     return 'https://api-pro.careermars.cn/api';
   } else {
@@ -23,7 +23,7 @@ export function getAiURL() {
 export function getBackendApiURL() {
   const hostname = window.location.hostname;
   if (hostname === 'www.careermars-test.cn') {
-    return 'http://api-test.careermars-test.cn/api';
+    return 'https://api-test.careermars-test.cn/api';
   } else if (hostname === 'www.careermars.cn') {
     return 'https://api-pro.careermars.cn/api';
   } else {
@@ -34,7 +34,7 @@ export function getBackendApiURL() {
 export function getBaseUrl() {
   const hostname = window.location.hostname;
   if (hostname === 'www.careermars-test.cn') {
-    return 'http://www.careermars-test.cn';
+    return 'https://www.careermars-test.cn';
   } else if (hostname === 'www.careermars.cn') {
     return 'https://www.careermars.cn';
   } else {

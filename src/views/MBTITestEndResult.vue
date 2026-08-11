@@ -40,7 +40,7 @@
     </div>
 
     <div class="button-section">
-      <button class="free-analysis-btn" @click=goNext>继续测试</button>
+      <button class="free-analysis-btn" @click=goNext>继续测试<span class="iconfont icon-sanjiaoxing"></span></button>
       <!-- <span class="iconfont icon-denglu"></span> -->
     </div>
   </div>
@@ -72,6 +72,7 @@ export default {
     return {
       // testReportText: '',  
       resumeText: '',  
+      mbtiResult: '',  
       mbtiResultData: '',
       userInfo: null,
     }
@@ -142,6 +143,7 @@ export default {
       // 从路由参数中获取数据
       this.mbtiResultData = JSON.parse(this.$route.params.mbtiResultDataStr);
       this.resumeText = this.$route.params.resumeText;
+      this.mbtiResult = this.$route.params.mbtiResult;
       this.userInfo = this.$route.params.userInfo;
       this.$nextTick(() => {
         this.setMaskTop()
@@ -152,6 +154,7 @@ export default {
         name: 'MatchJobLoad',
         params: { 
           resumeText: this.resumeText,
+          mbtiResult: this.mbtiResult,
           userInfo: this.userInfo,
         },
       });
@@ -332,13 +335,20 @@ export default {
 }
 
 .free-analysis-btn {
-  border: #fff solid 0.5rem;
+  border: 0.5rem solid #53E4C7;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  animation: cardGlow 3s ease-in-out infinite;
   background: #595959;
   width: 40rem; 
   height: 10rem; 
   color: white;
-  border-radius: 3rem; 
-  font-size:4rem; 
+  border-radius: 5rem; 
+  font-size:4.5rem; 
+  padding-left: 3rem;
+}
+
+.free-analysis-btn:active {
+  transform: scale(0.96);
 }
 
 .star {
@@ -395,4 +405,9 @@ export default {
   top: -5rem;
 }
 
+.icon-sanjiaoxing {
+  margin-left: 2rem;
+  font-size: 4rem;
+  color: yellow;
+}
 </style>

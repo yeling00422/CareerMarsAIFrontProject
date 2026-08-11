@@ -9,7 +9,7 @@
       <!-- 右上角匹配度标签 -->
         <div class="match-tag">
           <div class="match-tag-text">
-            <span class="iconfont icon-xunzhang1"></span>{{ currentTeacher.marryRate}}% 匹配
+            <span class="iconfont icon-xunzhang1"></span>{{ currentTeacher.workEnterprise}}
           </div>
         </div>
         <!-- 个人信息区 -->
@@ -17,8 +17,10 @@
           <!-- 头像占位 -->
           <div class="name-div">
             <h2 class="name">{{  currentTeacher.menName }}</h2>
+            <h2 class="school-name">{{  currentTeacher.schoolName }}</h2>
           </div>
           <div class="title-div">
+            <!-- <p class="title">{{  currentTeacher.workEnterprise }}</p> -->
             <p class="title">{{  currentTeacher.lableNames }}</p>
           </div>
           <hr class="line">
@@ -33,7 +35,7 @@
                   <span class="iconfont icon-xingxing star-fill" :style="getStarStyle(n)"></span>
                 </span>
               </div>
-              <span class="rating-score">{{  currentTeacher.rating }}</span>
+              <span class="rating-score">{{  currentTeacher.level }}</span>
             </div>
             <div class="rating-right">
               <span class="iconfont icon-renyuan"></span>
@@ -42,19 +44,20 @@
             </div>
           </div>
           <!-- 成功率 -->
-          <div class="rating-rate">
+          <!-- <div class="rating-rate">
             <span class="iconfont icon-zhengque"></span>
             <span class="success-rate">{{ currentTeacher.successRate}}%</span>
             <span class="success-text">成功率</span>
-          </div>
+          </div> -->
           <hr class="line">
         </div>
         <!-- 推荐理由 -->
         <div class="reasons-section">
-          <span class="reasons-title">为什么推荐 {{  currentTeacher.menName }}:</span>
-          <ul>
+          <span class="reasons-title">导师介绍 {{  currentTeacher.menName }}:</span>
+          <div class="reasons-resume"> {{  currentTeacher.resume }}</div>
+          <!-- <ul>
             <li v-for="(reason, index) in currentTeacher.reasons" :key="index"><span class="li-text">{{ reason }}</span></li>
-          </ul>
+          </ul> -->
         </div>
         <!-- 学员反馈 -->
         <div class="feedback-section">
@@ -65,17 +68,7 @@
         </div>
         <!-- 底部按钮 -->
         <div class="btn-div">
-          <!-- <button class="consult-btn" @click="goToConsult">预约免费咨询</button> -->
-          
-        </div>
-        <div class="consult-btn">
-          <contact-button
-            type="default"
-            session-from="mentor_consult"
-            @contact="handleConsultOpen"
-          >
-            咨询客服
-          </contact-button>
+          <button class="consult-btn" @click="goToConsult">预约免费咨询</button>
         </div>
     </div>
   </div>
@@ -95,7 +88,7 @@ const api = axios.create({
 });
 
 export default {
-  name: 'EndResult',
+  name: 'AllMentorResult',
   data() {
     return {
       currentPage: 1, 
@@ -120,44 +113,21 @@ export default {
           mentorId: this.mentorId,
         }
       });
-      // const responseDate =  response.data;
-      // if (responseDate.code === 200) {
-      //   alert('咨询导师成功！后续客服会联系您哦。如客服一直未联系您，请直接联系客服微信：zhiyaxing666或拨打电话：18888888888');
-      // }else {
-      //   alert(responseDate.msg+"后续客服会联系您。如客服一直未联系您，请直接联系客服微信：zhiyaxing666或拨打电话：18888888888");
-      // }
-      alert("即将为您跳转客服咨询");
+      const responseDate =  response.data;
+      if (responseDate.code === 200) {
+        alert('咨询导师成功！后续客服会联系您哦。如客服一直未联系您，请直接联系客服微信：zhiyaxing666或拨打电话：18888888888');
+      }else {
+        alert(responseDate.msg+"后续客服会联系您。如客服一直未联系您，请直接联系客服微信：zhiyaxing666或拨打电话：18888888888");
+      }
     },
-    async handleConsultOpen() {
-      // 打开客服会话成功，执行咨询记录上报
-      const userInfo = JSON.parse(this.$route.params.userInfo);
-      const studentId = userInfo.id;
-      const response = await api.get("/ai/save/consultation/record", {
-        params: {
-          studentId: studentId,
-          mentorId: this.mentorId,
-        }
-      })
-      wx.openCustomerServiceSession({
-        sessionFrom: "mentor_consult",
-        fail: (err) => {
-          console.error("拉起客服失败", err);
-          wx.showModal({
-            title: "提示",
-            content: "客服窗口拉起失败，请联系对接客服",
-            showCancel: false
-          });
-        }
-      }),
-      console.log("咨询记录上报完成", response);
-    },
-    // 官方API唤起客服会话
+    contactService(){
 
+    },
     getStarClass(index) {
       const starValue = index; // 当前是第几颗星（1~5）
-      if (this.currentTeacher.rating >= starValue) {
+      if (this.currentTeacher.level >= starValue) {
         return 'full'; // 全黄
-      } else if (this.currentTeacher.rating > starValue - 1) {
+      } else if (this.currentTeacher.level > starValue - 1) {
         return 'half'; // 半黄
       } else {
         return 'empty'; // 空
@@ -166,7 +136,7 @@ export default {
     getStarStyle(index) {
       const starNumber = index;
       const baseScore = starNumber - 1;
-      const currentScore = this.currentTeacher.rating - baseScore;
+      const currentScore = this.currentTeacher.level - baseScore;
       
       if (currentScore <= 0) {
         return { 
@@ -223,7 +193,7 @@ export default {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   top: 80rem;
   margin-top: 15rem;
 }
@@ -238,25 +208,24 @@ export default {
 
 .middle-container {
   position: relative;
-  top: 5rem;
   display: flex;
   flex-direction: column;
   width: 80rem;
   height: auto;
-  margin: auto;
+  margin: -5rem auto 15rem auto;
   border-radius: 5rem;
   background-color: #595959;
   border: #00f5d4 solid 0.5rem;
   box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
   padding-left: 5rem;
   padding-right: 5rem;
-  margin-bottom: 15rem;
+  /* margin-bottom: 25rem; */
 }
 
 /* 匹配度标签 */
 .match-tag {
   position: absolute;
-  width: 22rem;
+  min-width: 22rem;
   height: 6rem;
   top: 4rem;
   right: 3rem;
@@ -286,8 +255,10 @@ export default {
 
 /* 个人信息区 */
 .profile-section {
+  position: relative;
+  top: 5rem;
   margin-bottom: 2rem;
-  margin-top: 40rem;
+  margin-top: 10rem;
 }
 
 .avatar {
@@ -301,7 +272,8 @@ export default {
 .name-div{
   display: flex;
   position: relative;
-  top: -25rem;
+  justify-content: space-between;
+  /* top: -25rem; */
 }
 .name {
   font-size: 8rem;
@@ -310,11 +282,20 @@ export default {
   margin: 0;
 }
 
+.school-name {
+  position: relative;
+  top: 3rem;
+  font-size: 5rem;
+  font-weight: 900;
+  color: #ccc;
+  margin: 0;
+}
+
 .title-div {
   width: 100%;
-  height: 20rem;
+  min-height: 20rem;
   position: relative;
-  top: -25rem;
+  margin-top: 2rem;
 }
 
 .title {
@@ -324,13 +305,14 @@ export default {
 
 .line{
   position: relative;
-  top: -20rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
   right: 2rem;
   width: 100%;
 }
 .rating-info {
   position: relative;
-  top: -18rem;
+  /* top: -18rem; */
   display: flex;
   width: 100%;
   height: 10rem;
@@ -411,9 +393,9 @@ export default {
 
 .reasons-section{
   position: relative;
-  top: -20rem;
   width: 95%;
-  height: 10rem;
+  min-height: 10rem;
+  margin-top: 5rem;
   margin-bottom: 5rem;
 }
 
@@ -422,6 +404,14 @@ export default {
   font-size: 5rem;
   color:#fff;
   font-weight: 800;
+  /* margin-bottom: 2rem; */
+}
+
+.reasons-resume {
+  height: 30rem;
+  color: #ccc;
+  font-size: 4rem;
+  margin-top: 2rem;
   margin-bottom: 1rem;
 }
 
@@ -444,8 +434,7 @@ export default {
   width: 95%;
   height: 30rem;
   background-color: #C7C8C8;
-  margin:0 auto;
-  margin-top: 10rem;
+  /* margin-top: 10rem; */
   margin-bottom: 5rem;
   border-radius: 5rem;
   padding-top: 2rem;
@@ -482,20 +471,16 @@ export default {
 }
 /* 按钮 */
 .consult-btn {
-  width: 40rem;
-  height: 6rem;
+  width: 45rem;
+  height: 10rem;
   background: #00f5d4;
   border: 0.5rem solid #fff;
   color: #fff;
   border-radius: 5rem;
   padding: 1.5rem;
   font-size: 4rem;
-  margin: 0 auto;
   margin-bottom: 5rem;
-  text-align: center;
-  cursor: pointer;
 }
-
 
 /* 星星容器：相对定位，让内外层重叠 */
 .star {
