@@ -65,17 +65,7 @@
         </div>
         <!-- 底部按钮 -->
         <div class="btn-div">
-          <!-- <button class="consult-btn" @click="goToConsult">预约免费咨询</button> -->
-          
-        </div>
-        <div class="consult-btn">
-          <contact-button
-            type="default"
-            session-from="mentor_consult"
-            @contact="handleConsultOpen"
-          >
-            咨询客服
-          </contact-button>
+          <button class="consult-btn" @click="goToConsult">预约免费咨询</button>
         </div>
     </div>
   </div>
@@ -120,38 +110,14 @@ export default {
           mentorId: this.mentorId,
         }
       });
-      // const responseDate =  response.data;
-      // if (responseDate.code === 200) {
-      //   alert('咨询导师成功！后续客服会联系您哦。如客服一直未联系您，请直接联系客服微信：zhiyaxing666或拨打电话：18888888888');
-      // }else {
-      //   alert(responseDate.msg+"后续客服会联系您。如客服一直未联系您，请直接联系客服微信：zhiyaxing666或拨打电话：18888888888");
-      // }
-      alert("即将为您跳转客服咨询");
+      const responseDate =  response.data;
+      if (responseDate.code === 200) {
+        alert('咨询导师成功！后续客服会联系您哦。如客服一直未联系您，请直接联系客服微信：CareerMars_SH或拨打电话：188********');
+      }else {
+        alert(responseDate.msg+"后续客服会联系您。如客服一直未联系您，请直接联系客服微信：CareerMars_SH或拨打电话：188********");
+      }
     },
-    async handleConsultOpen() {
-      // 打开客服会话成功，执行咨询记录上报
-      const userInfo = JSON.parse(this.$route.params.userInfo);
-      const studentId = userInfo.id;
-      const response = await api.get("/ai/save/consultation/record", {
-        params: {
-          studentId: studentId,
-          mentorId: this.mentorId,
-        }
-      })
-      wx.openCustomerServiceSession({
-        sessionFrom: "mentor_consult",
-        fail: (err) => {
-          console.error("拉起客服失败", err);
-          wx.showModal({
-            title: "提示",
-            content: "客服窗口拉起失败，请联系对接客服",
-            showCancel: false
-          });
-        }
-      }),
-      console.log("咨询记录上报完成", response);
-    },
-    // 官方API唤起客服会话
+
 
     getStarClass(index) {
       const starValue = index; // 当前是第几颗星（1~5）
@@ -483,7 +449,7 @@ export default {
 /* 按钮 */
 .consult-btn {
   width: 40rem;
-  height: 6rem;
+  height: 9rem;
   background: #00f5d4;
   border: 0.5rem solid #fff;
   color: #fff;
