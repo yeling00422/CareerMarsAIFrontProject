@@ -1,0 +1,930 @@
+<template>
+  <div class="screen-cover">
+    <div class="screen-page" ref="page">
+      <canvas id="stars"></canvas>
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+
+      <div class="header">
+        <div class="badge">✦ 毓秀杯电影配音交流赛 · 第一期 · 2026 ✦</div>
+        <div class="title">以声会友&emsp;声深入心</div>
+      </div>
+
+      <div class="sep">
+        <div class="sep-line"></div>
+        <span>◆</span>
+        <div class="sep-line r"></div>
+      </div>
+
+      <div class="main">
+        <!-- 左侧：水滴人角色 -->
+        <div class="char-col">
+          <div class="char-wrap">
+            <div class="halo"></div>
+
+            <!-- SVG 水滴人：3D渐变 + 挥手 + 眨眼 + 表情变化 -->
+            <svg id="shuiDiRen" class="char-svg" viewBox="0 0 280 420" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="bG" cx="36%" cy="28%" r="70%">
+                  <stop offset="0%"   stop-color="#CCF0FF"/>
+                  <stop offset="40%"  stop-color="#7ECCE8"/>
+                  <stop offset="100%" stop-color="#3A8AB8"/>
+                </radialGradient>
+                <radialGradient id="hG" cx="35%" cy="30%" r="65%">
+                  <stop offset="0%"   stop-color="#5898E0"/>
+                  <stop offset="100%" stop-color="#0A3498"/>
+                </radialGradient>
+                <radialGradient id="ewG" cx="35%" cy="30%" r="65%">
+                  <stop offset="0%"   stop-color="#FFFFFF"/>
+                  <stop offset="100%" stop-color="#D5EDF8"/>
+                </radialGradient>
+                <radialGradient id="puG" cx="30%" cy="28%" r="62%">
+                  <stop offset="0%"   stop-color="#3060A0"/>
+                  <stop offset="55%"  stop-color="#081840"/>
+                  <stop offset="100%" stop-color="#040C20"/>
+                </radialGradient>
+                <radialGradient id="lG" cx="40%" cy="30%" r="65%">
+                  <stop offset="0%"   stop-color="#A0D8F0"/>
+                  <stop offset="100%" stop-color="#58AACC"/>
+                </radialGradient>
+                <radialGradient id="ornG" cx="30%" cy="25%" r="60%">
+                  <stop offset="0%"   stop-color="#E0F8FF"/>
+                  <stop offset="100%" stop-color="#4A90C8"/>
+                </radialGradient>
+                <filter id="fSh" x="-15%" y="-5%" width="135%" height="125%">
+                  <feDropShadow dx="2" dy="5" stdDeviation="5" flood-color="rgba(8,36,80,0.3)"/>
+                </filter>
+                <clipPath id="bClip">
+                  <path d="M140,68 C166,54 210,87 225,140 C242,196 238,254 221,300 C204,334 183,352 140,352 C97,352 76,334 59,300 C42,254 38,196 55,140 C70,87 114,54 140,68 Z"/>
+                </clipPath>
+              </defs>
+
+              <!-- 地面阴影 -->
+              <ellipse cx="140" cy="412" rx="62" ry="8" fill="rgba(30,80,140,0.2)"/>
+
+              <!-- 整体摇摆组 -->
+              <g class="char-body-group">
+
+                <!-- 腿部组 -->
+                <g class="leg-group">
+                  <path d="M117,345 Q112,373 110,388 Q111,400 122,400 Q133,400 131,388 Q129,373 124,345 Z"
+                        fill="url(#lG)" stroke="#4A90B8" stroke-width="1.5"/>
+                  <ellipse cx="116" cy="401" rx="25" ry="13" fill="#5AAAD0" stroke="#388AB0" stroke-width="1.5"/>
+                  <ellipse cx="116" cy="393" rx="16" ry="9"  fill="#6ABADC"/>
+                  <path d="M163,345 Q168,373 170,388 Q169,400 158,400 Q147,400 149,388 Q151,373 156,345 Z"
+                        fill="url(#lG)" stroke="#4A90B8" stroke-width="1.5"/>
+                  <ellipse cx="164" cy="401" rx="25" ry="13" fill="#5AAAD0" stroke="#388AB0" stroke-width="1.5"/>
+                  <ellipse cx="164" cy="393" rx="16" ry="9"  fill="#6ABADC"/>
+                </g>
+
+                <!-- 左臂（待机摆动） -->
+                <g class="arm-idle">
+                  <path d="M85,222 Q62,244 56,275 Q53,298 62,310 Q73,320 85,314 Q96,306 98,286 Q102,263 101,240"
+                        fill="url(#lG)" stroke="#4A90B8" stroke-width="2"/>
+                  <circle cx="60" cy="312" r="15" fill="url(#lG)" stroke="#4A90B8" stroke-width="1.5"/>
+                  <ellipse cx="47" cy="308" rx="7" ry="10" fill="url(#lG)" stroke="#4A90B8" stroke-width="1.2"/>
+                  <ellipse cx="44" cy="318" rx="7" ry="9"  fill="url(#lG)" stroke="#4A90B8" stroke-width="1.2"/>
+                </g>
+
+                <!-- 身体 -->
+                <path d="M140,68 C166,54 210,87 225,140 C242,196 238,254 221,300 C204,334 183,352 140,352 C97,352 76,334 59,300 C42,254 38,196 55,140 C70,87 114,54 140,68 Z"
+                      fill="url(#bG)" stroke="#3A88B0" stroke-width="2.5" filter="url(#fSh)"/>
+                <!-- 身体水光高光 -->
+                <ellipse cx="100" cy="122" rx="28" ry="50" fill="rgba(255,255,255,0.18)" transform="rotate(-20,100,122)"/>
+                <ellipse cx="88"  cy="110" rx="11" ry="22" fill="rgba(255,255,255,0.13)" transform="rotate(-20,88,110)"/>
+                <ellipse cx="180" cy="306" rx="18" ry="12" fill="rgba(255,255,255,0.08)" transform="rotate(15,180,306)"/>
+
+                <!-- 条纹衬衫 -->
+                <g clip-path="url(#bClip)">
+                  <rect x="38" y="244" width="204" height="112" fill="#F8F8F8"/>
+                  <rect x="38" y="244" width="204" height="14" fill="#2860C8"/>
+                  <rect x="38" y="270" width="204" height="14" fill="#2860C8"/>
+                  <rect x="38" y="296" width="204" height="14" fill="#2860C8"/>
+                  <rect x="38" y="322" width="204" height="14" fill="#2860C8"/>
+                  <rect x="38" y="348" width="204" height="14" fill="#2860C8"/>
+                  <rect x="38" y="244" width="204" height="2"  fill="rgba(0,30,100,0.15)"/>
+                  <circle cx="140" cy="278" r="18" fill="rgba(10,42,132,0.9)" stroke="rgba(255,255,255,0.75)" stroke-width="1.5"/>
+                  <text x="140" y="284" text-anchor="middle" fill="white" font-size="9" font-family="sans-serif" font-weight="bold">毓秀</text>
+                </g>
+                <!-- 短裤 -->
+                <g clip-path="url(#bClip)">
+                  <rect x="38" y="340" width="204" height="18" fill="rgba(42,38,68,0.92)"/>
+                </g>
+                <!-- 领口 V 型线 -->
+                <path d="M123,246 L140,260 L157,246" fill="none" stroke="#2060C0" stroke-width="2" stroke-linecap="round"/>
+
+                <!-- 右臂挥手 -->
+                <g class="arm-wave">
+                  <path d="M197,222 Q220,202 236,173 Q246,151 240,139 Q232,127 220,131 Q210,136 205,154 Q199,177 197,203"
+                        fill="url(#lG)" stroke="#4A90B8" stroke-width="2"/>
+                  <circle cx="239" cy="135" r="16" fill="url(#lG)" stroke="#4A90B8" stroke-width="1.5"/>
+                  <ellipse cx="242" cy="120" rx="6" ry="10" fill="url(#lG)" stroke="#4A90B8" stroke-width="1.2"/>
+                  <ellipse cx="252" cy="124" rx="5" ry="9"  fill="url(#lG)" stroke="#4A90B8" stroke-width="1.2"/>
+                  <ellipse cx="258" cy="134" rx="5" ry="7"  fill="url(#lG)" stroke="#4A90B8" stroke-width="1.2"/>
+                </g>
+
+                <!-- 左眼（更大、更圆、睫毛） -->
+                <g class="char-eye" style="transform-box:fill-box;transform-origin:50% 50%">
+                  <ellipse cx="112" cy="170" rx="29" ry="31" fill="url(#ewG)" stroke="#2A78A0" stroke-width="1.8"/>
+                  <ellipse cx="114" cy="174" rx="20" ry="22" fill="url(#puG)"/>
+                  <ellipse cx="114" cy="174" rx="12" ry="13" fill="#04081C"/>
+                  <ellipse cx="105" cy="160" rx="8.5" ry="9.5" fill="white" opacity="0.96"/>
+                  <ellipse cx="120" cy="178" rx="4"   ry="4.5" fill="rgba(255,255,255,0.62)"/>
+                  <circle  cx="104" cy="181" r="2.5"            fill="rgba(255,255,255,0.40)"/>
+                  <path d="M85,163 Q112,147 138,163" fill="none" stroke="#1A5878" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="88"  y1="162" x2="84"  y2="153" stroke="#1A5878" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="99"  y1="155" x2="96"  y2="146" stroke="#1A5878" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="112" y1="151" x2="112" y2="142" stroke="#1A5878" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="125" y1="155" x2="128" y2="146" stroke="#1A5878" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="136" y1="162" x2="140" y2="154" stroke="#1A5878" stroke-width="2" stroke-linecap="round"/>
+                </g>
+
+                <!-- 右眼 -->
+                <g class="char-eye" style="transform-box:fill-box;transform-origin:50% 50%">
+                  <ellipse cx="168" cy="170" rx="29" ry="31" fill="url(#ewG)" stroke="#2A78A0" stroke-width="1.8"/>
+                  <ellipse cx="170" cy="174" rx="20" ry="22" fill="url(#puG)"/>
+                  <ellipse cx="170" cy="174" rx="12" ry="13" fill="#04081C"/>
+                  <ellipse cx="161" cy="160" rx="8.5" ry="9.5" fill="white" opacity="0.96"/>
+                  <ellipse cx="176" cy="178" rx="4"   ry="4.5" fill="rgba(255,255,255,0.62)"/>
+                  <circle  cx="160" cy="181" r="2.5"            fill="rgba(255,255,255,0.40)"/>
+                  <path d="M142,163 Q168,147 194,163" fill="none" stroke="#1A5878" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="144" y1="162" x2="140" y2="153" stroke="#1A5878" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="155" y1="155" x2="152" y2="146" stroke="#1A5878" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="168" y1="151" x2="168" y2="142" stroke="#1A5878" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="181" y1="155" x2="184" y2="146" stroke="#1A5878" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="192" y1="162" x2="196" y2="154" stroke="#1A5878" stroke-width="2" stroke-linecap="round"/>
+                </g>
+
+                <!-- 眉毛 -->
+                <path d="M87,138 Q112,127 134,136" fill="none" stroke="#0A3070" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M146,136 Q168,127 193,138" fill="none" stroke="#0A3070" stroke-width="3.5" stroke-linecap="round"/>
+
+                <!-- 腮红 -->
+                <ellipse cx="82"  cy="205" rx="23" ry="14" fill="rgba(255,120,130,0.38)"/>
+                <ellipse cx="198" cy="205" rx="23" ry="14" fill="rgba(255,120,130,0.38)"/>
+
+                <!-- 嘴巴（JS控制） -->
+                <path id="charMouth" d="M118,230 Q140,252 162,230"
+                      stroke="#1A5878" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                <ellipse id="mouthInner" cx="140" cy="242" rx="19" ry="13" fill="#CC3355" opacity="0"/>
+                <ellipse id="mouthTeeth" cx="140" cy="234" rx="16" ry="7"  fill="white"   opacity="0"/>
+
+                <!-- 头发（三团，更有体积感） -->
+                <circle cx="140" cy="50"  r="43" fill="url(#hG)" stroke="#082A80" stroke-width="2"/>
+                <circle cx="166" cy="20"  r="24" fill="url(#hG)" stroke="#082A80" stroke-width="2"/>
+                <circle cx="116" cy="24"  r="19" fill="url(#hG)" stroke="#082A80" stroke-width="2"/>
+                <!-- 头发高光 -->
+                <ellipse cx="126" cy="36" rx="15" ry="11" fill="rgba(155,210,255,0.46)" transform="rotate(-20,126,36)"/>
+                <ellipse cx="158" cy="12" rx="10" ry="8"  fill="rgba(155,210,255,0.43)" transform="rotate(-15,158,12)"/>
+                <ellipse cx="108" cy="18" rx="7"  ry="5"  fill="rgba(155,210,255,0.36)" transform="rotate(-10,108,18)"/>
+
+                <!-- 水滴发饰（上下浮动） -->
+                <g class="drop-ornament">
+                  <ellipse cx="170" cy="14" rx="7" ry="10" fill="url(#ornG)" stroke="rgba(120,200,255,0.65)" stroke-width="1.2"/>
+                  <ellipse cx="167" cy="9"  rx="3" ry="4"  fill="rgba(255,255,255,0.65)" transform="rotate(-25,167,9)"/>
+                  <ellipse cx="173" cy="18" rx="2" ry="2.5" fill="rgba(255,255,255,0.35)"/>
+                </g>
+
+              </g>
+            </svg>
+
+            <div class="char-shadow-ring"></div>
+          </div>
+
+          <div class="char-name">小水滴 · AI评委</div>
+          <div class="char-role">毓秀杯 · 智能打分官</div>
+          <div class="speech" id="speech">你好呀～我是小水滴！<br>准备为选手们认真打分！✨</div>
+        </div>
+
+        <!-- 右侧：分数 -->
+        <div class="score-col">
+          <div class="player-card">
+            <div>
+              <div class="label">当前选手 :&nbsp;&nbsp;<span class="p-name" id="playerName">— 等待选手 —</span></div>
+              <div class="label">作品名称 :<span class="p-work" id="playerWork">— —</span></div>
+            </div>
+            <div class="total-box" style="display: none;">
+              <div class="label">综合总分</div>
+              <div class="total-num" id="totalScore">—</div>
+              <div class="total-sub">满分 20 星</div>
+            </div>
+          </div>
+
+          <div class="score-grid">
+            <div class="sc-card" id="sc0">
+              <div class="sc-top"><span class="sc-icon">📖</span><span class="sc-cat">难度系数</span></div>
+              <div class="sc-stars" id="ss0">
+                <span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span>
+              </div>
+              <div class="sc-num" id="n0">—</div>
+              <div class="bar-wrap"><div class="bar" id="b0"></div></div>
+            </div>
+            <div class="sc-card" id="sc1">
+              <div class="sc-top"><span class="sc-icon">🎬</span><span class="sc-cat">作品完成率</span></div>
+              <div class="sc-stars" id="ss1">
+                <span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span>
+              </div>
+              <div class="sc-num" id="n1">—</div>
+              <div class="bar-wrap"><div class="bar" id="b1"></div></div>
+            </div>
+            <div class="sc-card" id="sc2">
+              <div class="sc-top"><span class="sc-icon">🎤</span><span class="sc-cat">发音吐字准确度</span></div>
+              <div class="sc-stars" id="ss2">
+                <span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span>
+              </div>
+              <div class="sc-num" id="n2">—</div>
+              <div class="bar-wrap"><div class="bar" id="b2"></div></div>
+            </div>
+            <div class="sc-card" id="sc3">
+              <div class="sc-top"><span class="sc-icon">🎭</span><span class="sc-cat">角色还原度</span></div>
+              <div class="sc-stars" id="ss3">
+                <span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span><span class="star star-off">★</span>
+              </div>
+              <div class="sc-num" id="n3">—</div>
+              <div class="bar-wrap"><div class="bar" id="b3"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cf-wrap" id="cfWrap"></div>
+      <div class="score-list-button" @click="toggleScoreList">
+        <span class="slb-arrow">{{ showScoreList ? '▶' : '◀' }}</span>
+        <span class="slb-label">排行榜</span>
+      </div>
+      <div class="score-list" v-show="showScoreList">
+        <div class="sl-header">🏆 选手得分榜</div>
+        <!-- 表头 -->
+        <div class="sl-row sl-header-row">
+          <span class="sl-rank sl-header-item">排名</span>
+          <span class="sl-name sl-header-item">参赛选手</span>
+          <span class="sl-score sl-header-item">专家评委组得分</span>
+          <span class="sl-score sl-header-item">大众评委组得分</span>
+          <span class="sl-score sl-header-item">最终总得分</span>
+        </div>
+        <div class="sl-body">
+          <div class="sl-row" v-for="(item, i) in visibleScoreList" :key="scoreListOffset + i">
+            <span class="sl-rank" :class="'top-' + (scoreListOffset + i + 1)">{{ scoreListOffset + i + 1 }}</span>
+            <span class="sl-name">{{ item.name }}</span>
+            <span class="sl-score">{{ item.expertScore === -1 ? '未打分' : item.expertScore }}</span>
+            <span class="sl-score">{{ item.volkswagenScore === -1 ? '未打分' : item.volkswagenScore }}</span>
+            <span class="sl-score">{{ item.endScore === -1 ? '待统计' : item.endScore }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+import { getAiURL } from '@/utils/index';
+
+const api = axios.create({ baseURL: getAiURL(), headers: { 'Content-Type': 'application/json' } });
+const FIELDS = ['score1', 'score2', 'score3', 'score4'];
+const SPEECH = [
+  [18, '哇哦！！满星级别。小水滴超级感动！🌟✨🎉'],
+  [15, '太棒了！这位选手实力超强！👏💫'],
+  [12, '不错哦！继续努力会更棒！😊💪'],
+  [0,  '加油加油！下次一定会更好！💕'],
+];
+const IDLE = [
+  '你好呀～我是小水滴！准备为选手们认真打分！✨',
+  '小水滴的耳朵竖起来啦！认真听，认真评！👂✨',
+  '毓秀杯加油！每一位选手都很棒！💕',
+  '配音是一门艺术，小水滴会仔细欣赏的～🎭',
+];
+
+// 各表情对应的嘴巴路径
+const MOUTH = {
+  idle:     'M118,230 Q140,252 162,230',
+  worried:  'M118,236 Q140,226 162,236',
+  normal:   'M116,229 Q140,254 164,229',
+  happy:    'M112,227 Q140,260 168,227',
+  excited:  'M108,225 Q140,272 172,225',
+};
+
+export default {
+  name: 'Screen',
+  data() { return { lastData: null, showScoreList: false, scoreList: [], scoreListOffset: 0 }; },
+  computed: {
+    visibleScoreList() {
+      return this.scoreList.slice(this.scoreListOffset, this.scoreListOffset + 6);
+    },
+  },
+  mounted() {
+    this.scaleScreen();
+    window.addEventListener('resize', this.scaleScreen);
+    this.initStars();
+    this.startPoll();
+    this.startIdleSpeech();
+  },
+  methods: {
+    scaleScreen() {
+      const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      const el = this.$refs.page;
+      el.style.transform = `scale(${scale})`;
+      el.style.left = `${(window.innerWidth - 1920 * scale) / 2}px`;
+      el.style.top  = `${(window.innerHeight - 1080 * scale) / 2}px`;
+    },
+    initStars() {
+      const cv = document.getElementById('stars');
+      const ctx = cv.getContext('2d');
+      cv.width = 1920; cv.height = 1080;
+      const stars = Array.from({ length: 160 }, () => ({
+        x: Math.random() * 1920, y: Math.random() * 1080,
+        r: 0.3 + Math.random() * 1.2,
+        a: Math.random(), da: (Math.random() - 0.5) * 0.018,
+      }));
+      const draw = () => {
+        ctx.clearRect(0, 0, 1920, 1080);
+        stars.forEach(s => {
+          s.a += s.da;
+          if (s.a <= 0 || s.a >= 1) s.da = -s.da;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(210,170,255,${s.a * 0.6})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      };
+      draw();
+    },
+    setSpeech(txt) {
+      const el = document.getElementById('speech');
+      el.style.opacity = '0';
+      setTimeout(() => { el.innerHTML = txt; el.style.opacity = '1'; }, 200);
+    },
+
+    // 根据总分更新角色表情（嘴型 + 眼神 + 发光）
+    updateExpression(total) {
+      const mouth  = document.getElementById('charMouth');
+      const mInner = document.getElementById('mouthInner');
+      const mTeeth = document.getElementById('mouthTeeth');
+      const svg    = document.getElementById('shuiDiRen');
+      if (!mouth) return;
+
+      let mouthPath = MOUTH.idle;
+      let openOpacity  = '0';
+      let teethOpacity = '0';
+      let stateClass   = '';
+
+      if (total == null) {
+        mouthPath  = MOUTH.idle;
+      } else if (total >= 18) {
+        mouthPath    = MOUTH.excited;
+        openOpacity  = '1';
+        teethOpacity = '1';
+        stateClass   = 'state-excited';
+      } else if (total >= 15) {
+        mouthPath  = MOUTH.happy;
+        stateClass = 'state-happy';
+      } else if (total >= 12) {
+        mouthPath  = MOUTH.normal;
+        stateClass = 'state-normal';
+      } else {
+        mouthPath  = MOUTH.worried;
+        stateClass = 'state-low';
+      }
+
+      mouth.setAttribute('d', mouthPath);
+      mInner.setAttribute('opacity', openOpacity);
+      mTeeth.setAttribute('opacity', teethOpacity);
+      if (svg) svg.setAttribute('class', `char-svg ${stateClass}`);
+    },
+
+    confetti() {
+      const w = document.getElementById('cfWrap'); w.innerHTML = '';
+      const cols = ['#FF8FAB','#C084FC','#F0D27A','#67E8F9','#A3E635','#FB923C'];
+      for (let i = 0; i < 90; i++) {
+        const d = document.createElement('div'); d.className = 'cf';
+        d.style.cssText = `left:${Math.random()*100}%;background:${cols[i%6]};width:${4+Math.random()*8}px;height:${6+Math.random()*10}px;rotate:${Math.random()*360}deg;animation-duration:${1.8+Math.random()*2}s`;
+        w.appendChild(d);
+      }
+      setTimeout(() => { w.innerHTML = ''; }, 4500);
+    },
+
+    async fetchLatest() {
+      try {
+        const { data } = await api.get('/ai/yxb/search/score');
+        const d = data.data;
+        if (!d) { this.showEmpty(); return; }
+
+        const changed = JSON.stringify(d) !== JSON.stringify(this.lastData);
+        this.lastData = d;
+
+        document.getElementById('playerName').innerText = d.name || '— 等待选手 —';
+        document.getElementById('playerWork').innerText = d.work ? `《${d.work}》` : '— —';
+
+        let total = 0, counted = 0;
+        FIELDS.forEach((field, i) => {
+          const val  = d[field];
+          const num  = document.getElementById(`n${i}`);
+          const bar  = document.getElementById(`b${i}`);
+          const card = document.getElementById(`sc${i}`);
+          const stars = document.querySelectorAll(`#ss${i} .star`);
+          if (val == null || isNaN(val)) {
+            num.innerText = '—';
+            bar.style.width = '0%'; card.classList.remove('lit');
+            stars.forEach(s => { s.className = 'star star-off'; s.removeAttribute('style'); });
+          } else {
+            const v = Number(val);
+            num.innerText = v % 1 === 0 ? v.toFixed(1) : String(v);
+            bar.style.width = `${v / 5 * 100}%`; card.classList.add('lit');
+            stars.forEach((s, si) => {
+              const fill = Math.min(100, Math.max(0, (v - si) * 100));
+              if (fill >= 100) {
+                s.className = 'star star-on'; s.removeAttribute('style');
+              } else if (fill <= 0) {
+                s.className = 'star star-off'; s.removeAttribute('style');
+              } else {
+                s.className = 'star';
+                s.setAttribute('style', `background:linear-gradient(90deg,#F0D27A ${fill.toFixed(1)}%,rgba(255,255,255,.15) ${fill.toFixed(1)}%);-webkit-background-clip:text;-webkit-text-fill-color:transparent`);
+              }
+            });
+            total += v; counted++;
+            if (changed) { num.classList.add('bump'); setTimeout(() => num.classList.remove('bump'), 500); }
+          }
+        });
+
+        document.getElementById('totalScore').innerText = counted > 0 ? total : '—';
+        this.updateExpression(counted > 0 ? total : null);
+
+        if (changed && counted > 0 && total >= 18) this.confetti();
+        if (changed && counted > 0) {
+          const sp = SPEECH.find(s => total >= s[0]);
+          if (sp) this.setSpeech(sp[1]);
+        }
+      } catch (e) {
+        this.showEmpty();
+      }
+    },
+
+    showEmpty() {
+      document.getElementById('playerName').innerText = '— 等待选手 —';
+      document.getElementById('playerWork').innerText = '— —';
+      document.getElementById('totalScore').innerText = '—';
+      FIELDS.forEach((_, i) => {
+        document.getElementById(`n${i}`).innerText = '—';
+        document.getElementById(`b${i}`).style.width = '0%';
+        document.getElementById(`sc${i}`).classList.remove('lit');
+        document.querySelectorAll(`#ss${i} .star`).forEach(s => { s.className = 'star star-off'; s.removeAttribute('style'); });
+      });
+      this.updateExpression(null);
+    },
+
+    async fetchScoreList() {
+      try {
+        const { data } = await api.get('/ai/yxb/search/endScore');
+        if (Array.isArray(data.data)) {
+
+          // ✅ 过滤：两个都为 -1 才不显示
+          const filtered = data.data.filter(item => {
+            return !(item.expertScore === -1 && item.volkswagenScore === -1);
+          });
+
+          // 按分数从高到低排序，未打分(-1)放最后
+          this.scoreList = filtered.sort((a, b) => {
+            const sa = a.endScore === -1 ? -999 : a.endScore;
+            const sb = b.endScore === -1 ? -999 : b.endScore;
+            return sb - sa;
+          });
+          this.scoreListOffset = 0;
+        }
+      } catch (e) {}
+    },
+    startPoll() {
+      this.fetchLatest(); 
+      setInterval(this.fetchLatest, 10000); 
+
+      // ✅ 新增：排行榜每60秒自动同步一次
+      this.fetchScoreList();
+      setInterval(this.fetchScoreList, 60000);
+    },
+    startIdleSpeech() {
+      setInterval(() => {
+        if (!this.lastData || !this.lastData.name) {
+          this.setSpeech(IDLE[Math.floor(Math.random() * IDLE.length)]);
+        }
+      }, 7000);
+    },
+    toggleScoreList() {
+      this.showScoreList = !this.showScoreList;
+      if (this.showScoreList) {
+        this.fetchScoreList();
+        this.startScoreListCycle();
+      } else {
+        if (this._scoreListTimer) {
+          clearInterval(this._scoreListTimer);
+          this._scoreListTimer = null;
+        }
+      }
+    },
+    startScoreListCycle() {
+      if (this._scoreListTimer) clearInterval(this._scoreListTimer);
+      this._scoreListTimer = setInterval(() => {
+        const next = this.scoreListOffset + 6;
+        this.scoreListOffset = next >= this.scoreList.length ? 0 : next;
+      }, 10000);
+    },
+  },
+};
+</script>
+
+<style scoped>
+/* ── 全屏遮罩 ── */
+.screen-cover {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #080514; overflow: hidden;
+}
+:global(.logo), :global(.particles) { display: none !important; }
+
+/* ── 1920×1080 内容区 ── */
+.screen-page {
+  width: 1920px; height: 1080px;
+  position: absolute; top: 0; left: 0;
+  transform-origin: 0 0;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #FFF8FF;
+  display: flex; flex-direction: column;
+}
+
+/* ── 背景 ── */
+canvas#stars { position: absolute; inset: 0; z-index: 0; }
+.blob { position: absolute; border-radius: 50%; filter: blur(90px); z-index: 0; }
+.b1 { width: 700px; height: 700px; top: -200px; left: -150px; background: rgba(168,85,247,.2); }
+.b2 { width: 600px; height: 600px; bottom: -180px; right: -120px; background: rgba(255,143,171,.16); }
+
+/* ── 标题 ── */
+.header { position: relative; z-index: 1; text-align: center; padding: 28px 0 14px; }
+.badge {
+  display: inline-block; border: 1px solid rgba(168,85,247,.45); border-radius: 999px;
+  padding: 5px 26px; font-size: 50px; letter-spacing: 4px; color: #C084FC; margin-bottom: 12px;
+}
+.title {
+  font-family: "STKaiti","KaiTi",serif; font-size: 54px; font-weight: bold; letter-spacing: 8px;
+  background: linear-gradient(135deg, #F0D27A 0%, #FF8FAB 45%, #C084FC 80%, #F0D27A 100%);
+  background-size: 220% auto; -webkit-background-clip: text; color: transparent;
+  animation: shimmer 5s linear infinite;
+}
+.subtitle { font-size: 18px; color: rgba(255,255,255,.48); letter-spacing: 5px; margin-top: 8px; }
+@keyframes shimmer { 0%{background-position:0% center} 100%{background-position:220% center} }
+
+/* ── 分割线 ── */
+.sep {
+  display: flex; align-items: center; gap: 16px;
+  width: 1760px; margin: 10px auto 20px;
+  position: relative; z-index: 1; color: #C084FC; font-size: 16px;
+}
+.sep-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(192,132,252,.6)); }
+.sep-line.r { background: linear-gradient(270deg, transparent, rgba(192,132,252,.6)); }
+
+/* ── 主体布局 ── */
+.main {
+  flex: 1; min-height: 0;
+  display: flex; gap: 48px; align-items: flex-start;
+  width: 1760px; margin: 0 auto; padding-bottom: 24px;
+  position: relative; z-index: 1;
+}
+
+/* ── 左侧角色列 ── */
+.char-col {
+  width: 500px; 
+  height: 750px;
+  flex-shrink: 0;
+  background: rgba(16,8,40,.95); border: 1px solid rgba(168,85,247,.22); border-radius: 24px;
+  padding: 20px 20px 24px; text-align: center;
+}
+.char-wrap {
+  position: relative; width: 310px; height: 360px; margin: 80px auto;
+  display: flex; align-items: center; justify-content: center;
+}
+.halo {
+  position: absolute; width: 240px; height: 240px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(100,180,255,.18) 0%, transparent 70%);
+  animation: halo 3.5s ease-in-out infinite;
+}
+@keyframes halo { 0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.15);opacity:.85} }
+
+/* ── 水滴人 SVG ── */
+.char-svg {
+  width: 240px; height: auto; position: relative; z-index: 1;
+  filter: drop-shadow(0 0 10px rgba(100,180,255,0.4));
+  animation: charFloat 3.8s ease-in-out infinite;
+  transition: filter 0.5s ease;
+}
+/* 分数状态发光 */
+.char-svg.state-normal  { filter: drop-shadow(0 0 12px rgba(168,85,247,.5)); }
+.char-svg.state-happy   { filter: drop-shadow(0 0 20px rgba(168,85,247,.75)); }
+.char-svg.state-excited { filter: drop-shadow(0 0 28px rgba(240,210,122,.85)) drop-shadow(0 0 14px rgba(255,143,171,.5)); }
+.char-svg.state-low     { filter: drop-shadow(0 0 8px rgba(100,150,200,0.3)); }
+
+/* 角色浮动 */
+@keyframes charFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+
+/* 右臂挥手（transform-origin 对应 SVG 中右臂肩关节坐标 197,222） */
+.arm-wave {
+  transform-origin: 197px 222px;
+  animation: armWave 2s ease-in-out infinite;
+}
+@keyframes armWave {
+  0%, 100% { transform: rotate(0deg); }
+  35%       { transform: rotate(-28deg); }
+  70%       { transform: rotate(14deg); }
+}
+
+/* 眨眼（transform-box:fill-box 让 50% 50% 基于各自眼睛的包围盒） */
+.char-eye { animation: eyeBlink 5s ease-in-out infinite; }
+.char-eye + .char-eye { animation-delay: 0.1s; }
+@keyframes eyeBlink {
+  0%, 85%, 95%, 100% { transform: scaleY(1); }
+  90%                 { transform: scaleY(0.06); }
+}
+
+/* 地面光环 */
+.char-shadow-ring {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  width: 130px; height: 14px;
+  background: radial-gradient(ellipse, rgba(100,180,255,.35), transparent);
+  border-radius: 50%;
+  animation: shadowPulse 3.8s ease-in-out infinite;
+}
+@keyframes shadowPulse {
+  0%, 100% { opacity: .5; transform: translateX(-50%) scaleX(1); }
+  50%       { opacity: .8; transform: translateX(-50%) scaleX(0.82); }
+}
+
+/* 整体身体摇摆 */
+.char-body-group {
+  transform-box: fill-box;
+  transform-origin: 50% 95%;
+  animation: charSway 5s ease-in-out infinite;
+}
+@keyframes charSway {
+  0%, 100% { transform: rotate(-2deg); }
+  50%      { transform: rotate(2deg); }
+}
+
+/* 左臂待机摆动 */
+.arm-idle {
+  transform-box: fill-box;
+  transform-origin: 100% 0%;
+  animation: armIdle 8s ease-in-out infinite;
+}
+@keyframes armIdle {
+  0%, 45%, 100% { transform: rotate(0deg); }
+  18%           { transform: rotate(14deg); }
+  32%           { transform: rotate(-7deg); }
+  65%           { transform: rotate(10deg); }
+  82%           { transform: rotate(-4deg); }
+}
+
+/* 腿部左右摇摆 */
+.leg-group {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+  animation: legSway 5s ease-in-out infinite;
+}
+@keyframes legSway {
+  0%, 100% { transform: rotate(-1deg); }
+  50%      { transform: rotate(1deg); }
+}
+
+/* 发饰水滴上下浮动 */
+.drop-ornament {
+  animation: dropFloat 3s ease-in-out infinite;
+}
+@keyframes dropFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-5px); }
+}
+
+.char-name {
+  font-family: "STKaiti","KaiTi",serif; font-size: 28px; font-weight: bold; margin-top: 10px;
+  background: linear-gradient(135deg,#7EC8E8,#C084FC);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 25px;
+}
+.char-role { font-size: 15px; color: rgba(255,255,255,.5); letter-spacing: 2px; margin-top: 5px; }
+.speech {
+  background: rgba(100,180,255,.1); border: 1px solid rgba(100,180,255,.3); border-radius: 14px;
+  padding: 12px 16px; font-size: 16px; color: rgba(255,255,255,.88);
+  margin-top: 30px; line-height: 1.7; transition: opacity .3s;
+}
+
+/* ── 右侧分数列 ── */
+.score-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+
+.player-card {
+  height: 200px; flex-shrink: 0;
+  background: rgba(16,8,40,.95); border: 1px solid rgba(168,85,247,.22); border-radius: 24px;
+  padding: 22px 36px; display: flex; justify-content: space-between; align-items: center;
+}
+.label { font-size: 30px; color: #C084FC; letter-spacing: 2px;margin-top: 30px;margin-bottom: 30px;}
+.p-name { 
+  font-family: "STKaiti", KaiTi, serif;
+  font-size: clamp(26px,6vw,42px);
+  background: linear-gradient(135deg, #F0D27A, #FF8FAB, #C084FC);
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: .2em;
+  font-weight: bold;
+}
+.p-work { 
+  font-family: "STKaiti", KaiTi, serif;
+  font-size: clamp(26px,6vw,42px);
+  background: linear-gradient(135deg, #F0D27A, #FF8FAB, #C084FC);
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: .2em;
+  font-weight: bold;
+}
+.total-box { text-align: center; padding-left: 36px; border-left: 1px solid rgba(168,85,247,.2); }
+.total-num {
+  font-family: "STKaiti","KaiTi",serif; font-size: 96px; font-weight: 900; line-height: 1;
+  background: linear-gradient(135deg,#F0D27A,#FF8FAB,#C084FC); background-size: 220% auto;
+  -webkit-background-clip: text; color: transparent; animation: shimmer 5s linear infinite;
+}
+.total-sub { font-size: 14px; color: rgba(255,255,255,.38); margin-top: 4px; }
+
+.score-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 20px; }
+.sc-card {
+  height: 210px;
+  background: rgba(16,8,40,.95); border: 1px solid rgba(168,85,247,.22); border-radius: 20px;
+  padding: 20px 28px; display: flex; flex-direction: column; transition: border-color .3s, box-shadow .3s;
+}
+.sc-card.lit { border-color: rgba(168,85,247,.8); box-shadow: 0 0 30px rgba(168,85,247,.18); }
+.sc-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.sc-icon { font-size: 32px; }
+.sc-cat  { font-size: 22px; font-weight: bold; color: rgba(255,255,255,.9); }
+.sc-stars {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.star { font-size: 42px; line-height: 1; transition: color .35s; }
+.star-on  { color: #F0D27A; filter: drop-shadow(0 0 7px rgba(240,210,122,.75)); }
+.star-off { color: rgba(255,255,255,.15); }
+
+.sc-num {
+  font-size: 30px; font-weight: 900; text-align: center;
+  background: linear-gradient(135deg,#F0D27A,#FF8FAB,#C084FC); background-size: 220% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  animation: shimmer 5s linear infinite;
+}
+.bar-wrap { height: 8px; background: rgba(255,255,255,.08); border-radius: 999px; margin-top: 10px; overflow: hidden; }
+.bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg,#A855F7,#FF8FAB,#F0D27A); transition: width .7s ease; }
+
+@keyframes bump { 0%{transform:scale(1)} 40%{transform:scale(1.18)} 100%{transform:scale(1)} }
+.sc-num.bump { animation: bump .5s ease, shimmer 5s linear infinite; }
+
+/* ── 彩带 ── */
+.cf-wrap { position: absolute; inset: 0; z-index: 200; pointer-events: none; }
+.cf { position: absolute; border-radius: 3px; animation: fall linear forwards; }
+@keyframes fall { 0%{transform:translateY(-10px) rotate(0deg);opacity:1} 100%{transform:translateY(105vh) rotate(720deg);opacity:0} }
+
+.score-list-button {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 160px;
+  background: linear-gradient(180deg, rgba(168,85,247,.55), rgba(255,143,171,.45));
+  border: 1px solid rgba(168,85,247,.6);
+  border-radius: 14px 0 0 14px;
+  z-index: 100;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background .2s, box-shadow .2s;
+  user-select: none;
+}
+.score-list-button:hover {
+  background: linear-gradient(180deg, rgba(168,85,247,.8), rgba(255,143,171,.7));
+  box-shadow: 0 0 20px rgba(168,85,247,.45);
+}
+.slb-arrow {
+  font-size: 12px;
+  color: rgba(255,255,255,.9);
+}
+.slb-label {
+  writing-mode: vertical-rl;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: #fff;
+  font-weight: bold;
+}
+
+
+
+.score-list {
+  position: absolute;
+  left: 650px;
+  top: 250px;
+  width: 1100px;
+  height: 720px;
+  background: rgba(8, 5, 20, .97);
+  border: 1px solid rgba(168,85,247,.35);
+  border-top: none;
+  border-radius: 0 0 24px 24px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 36px 48px 40px;
+  box-shadow: 0 16px 60px rgba(0,0,0,.6);
+}
+.sl-header {
+  font-family: "STKaiti","KaiTi",serif;
+  font-size: 38px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #F0D27A, #FF8FAB, #C084FC);
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: 5px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+.sl-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sl-row {
+  display: flex;
+  align-items: center;
+  /* 把 justify-content: space-between 删掉，改用固定宽度的列 */
+  padding: 20px 16px;
+  background: rgba(168,85,247,.07);
+  border: 1px solid rgba(168,85,247,.14);
+  border-radius: 16px;
+}
+
+/* 固定每一列的宽度，和表头、数据都保持一致 */
+.sl-rank {
+  font-size: 30px;
+  font-weight: 900;
+  width: 80px;
+  color: rgba(255,255,255,.35);
+  font-family: "STKaiti","KaiTi",serif;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  text-align: center;
+}
+
+.sl-name {
+  font-family: "STKaiti","KaiTi",serif;
+  font-size: 30px;
+  font-weight: bold;
+  color: rgba(255,255,255,.88);
+  letter-spacing: 2px;
+  /* 给参赛选手列也设置固定宽度，而不是 flex:1 */
+  width: 300px;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  text-align: center;
+}
+
+.sl-score {
+  font-family: "STKaiti","KaiTi",serif;
+  font-size: 30px;
+  font-weight: 900;
+  width: 300px; 
+  background: linear-gradient(135deg,#F0D27A,#FF8FAB,#C084FC);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 5s linear infinite;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  text-align: center;
+}
+
+.top-1 { background: linear-gradient(135deg,#F0D27A,#FFB800); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.top-2 { background: linear-gradient(135deg,#D0D0D0,#F0F0F0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.top-3 { background: linear-gradient(135deg,#CD7F32,#E8A060); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+
+
+/* 排行榜表头样式 */
+.sl-header-row {
+  background: rgba(168,85,247,.15);
+  border-color: rgba(168,85,247,.25);
+  margin-bottom: 8px;
+}
+.sl-header-item {
+  font-size: 28px !important;
+  color: #C084FC !important;
+  background: none !important;
+  -webkit-text-fill-color: #C084FC !important;
+  font-weight: bold;
+}
+</style>
