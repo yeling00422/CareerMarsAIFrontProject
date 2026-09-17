@@ -141,12 +141,17 @@ export default {
       showScoreList: false,
       scoreList: [],
       scoreListOffset: 0,
+      // 四个评分项目
       scoreItems: [
         { name: '难度系数', value: null },
         { name: '作品完成率', value: null },
         { name: '发音准确度', value: null },
         { name: '角色还原度', value: null },
       ],
+      currentPlayerName: '—',
+      playerWork: '—',
+      displayTotal: '—',
+      // studentList: [],
       stu1:null,
       stu2:null,
       avgScore: null,
@@ -164,6 +169,32 @@ export default {
     this.startPoll();
     this.startIdleSpeech();
   },
+  destroyed() {
+    document.body.classList.remove('has-yuxiucup-screen');
+    window.removeEventListener('resize', this.scaleScreen);
+    if (this._scoreTimer) {
+      clearInterval(this._scoreTimer);
+      this._scoreTimer = null;
+    }
+    if (this._scoreListSyncTimer) {
+      clearInterval(this._scoreListSyncTimer);
+      this._scoreListSyncTimer = null;
+    }
+    if (this._idleSpeechTimer) {
+      clearInterval(this._idleSpeechTimer);
+      this._idleSpeechTimer = null;
+    }
+    if (this._scoreListTimer) {
+      clearInterval(this._scoreListTimer);
+      this._scoreListTimer = null;
+    }
+  },
+  activated() {
+    document.body.classList.add('has-yuxiucup-screen')
+  },
+  deactivated() {
+    document.body.classList.remove('has-yuxiucup-screen')
+  },
   methods: {
     scaleScreen() {
       const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
@@ -171,6 +202,31 @@ export default {
       el.style.transform = `scale(${scale})`;
       el.style.left = `${(window.innerWidth - 1920 * scale) / 2}px`;
       el.style.top = `${(window.innerHeight - 1080 * scale) / 2}px`;
+    },
+    initStars() {
+      const cv = document.getElementById('stars');
+      const ctx = cv.getContext('2d');
+      cv.width = 1920; cv.height = 1080;
+      const stars = Array.from({ length: 160 }, () => ({
+        x: Math.random() * 1920,
+        y: Math.random() * 1080,
+        r: 0.3 + Math.random() * 1.2,
+        a: Math.random(),
+        da: (Math.random() - 0.5) * 0.018,
+      }));
+      const draw = () => {
+        ctx.clearRect(0, 0, 1920, 1080);
+        stars.forEach(s => {
+          s.a += s.da;
+          if (s.a <= 0 || s.a >= 1) s.da = -s.da;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(210,170,255,${s.a * 0.6})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      };
+      draw();
     },
     setSpeech(txt) {
       const el = document.getElementById('speech');
@@ -181,43 +237,69 @@ export default {
       try {
         const res = await api.get('/ai/yxb/search/score');
         const responseData = res.data;
-        if (responseData.code !== 200 || responseData.data == null || responseData.data.length === 0) {
+        console.log('responseData',responseData);
+        if (responseData.code !== 200 || responseData.data == null) {
           this.showEmpty();
           return;
         }
         const studentList = responseData.data;
         this.stu1 = studentList[0] || null;
         this.stu2 = studentList[1] || null;
-        if (!this.stu1) {
-          this.avgScore = null;
-        } else if (this.stu2 != null) {
+        console.log('this.stu1',this.stu1);
+        console.log('this.stu2',this.stu2);
+        if (this.stu2 != null) {
           this.avgScore = (this.stu1.total + this.stu2.total) / 2;
-        } else {
+        }else{ 
           this.avgScore = this.stu1.total;
         }
-        let speech = '';
-        if (this.avgScore >= 18) {
-          speech = SPEECH[0][1];
-        } else if (this.avgScore >= 15) {
-          speech = SPEECH[1][1];
-        } else if (this.avgScore >= 12) {
-          speech = SPEECH[2][1];
-        } else {
-          speech = SPEECH[3][1];
-        }
-        this.setSpeech(speech);
+        console.log('this.avgScore',this.avgScore);
+        // // 当前选手
+        // this.currentPlayerName = data.playerName || data.name || data.studentName || '—';
+        // this.playerWork = data.playerWork || data.workName || data.work || '—';
+        // // 四项评分
+        // const values = FIELDS.map(field => {
+        //   const value = Number(data[field]);
+        //   return Number.isFinite(value) ? value : null;
+        // });
+        // this.scoreItems.forEach((item, index) => {
+        //   item.value = values[index];
+        // });
+        // // 总分
+        // const validValues = values.filter(value => value !== null);
+        // if (validValues.length > 0) {
+        //   const total = validValues.reduce((sum, value) => sum + value, 0);
+        //   this.displayTotal = total.toFixed(1);
+        // } else {
+        //   this.displayTotal = '—';
+        // }
+        // this.lastData = data;
+        // // 小水滴台词
+        // const total = Number(this.displayTotal);
+        // if (Number.isFinite(total)) {
+        //   let speech = '';
+        //   if (total >= 18) {
+        //     speech = SPEECH[0][1];
+        //   } else if (total >= 15) {
+        //     speech = SPEECH[1][1];
+        //   } else if (total >= 12) {
+        //     speech = SPEECH[2][1];
+        //   } else {
+        //     speech = SPEECH[3][1];
+        //   }
+        //   this.setSpeech(speech);
+        // }
       } catch (error) {
         console.error('获取最新评分失败：', error);
       }
     },
     showEmpty() {
+      this.currentPlayerName = '—';
+      this.playerWork = '—';
+      this.displayTotal = '—';
       this.scoreItems.forEach(item => {
         item.value = null;
       });
       this.lastData = null;
-      this.avgScore = null;
-      this.stu1 = null;
-      this.stu2 = null;
     },
     async fetchScoreList() {
       try {
@@ -249,7 +331,7 @@ export default {
     },
     startIdleSpeech() {
       this._idleSpeechTimer = setInterval(() => {
-        if (!this.lastData) {
+        if (!this.lastData || !this.currentPlayerName || this.currentPlayerName === '—') {
           this.setSpeech(IDLE[Math.floor(Math.random() * IDLE.length)]);
         }
       }, 7000);

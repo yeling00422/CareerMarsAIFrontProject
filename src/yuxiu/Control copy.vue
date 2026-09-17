@@ -1,22 +1,16 @@
 <template>
   <div class="control-page">
-    <div class="pwd-modal" v-if="!passAuth">
-      <div class="pwd-box">
-        <div class="pwd-title">🔐 大屏控制台口令验证</div>
-        <input ref="pwdInput" v-model="inputPwd" @keyup.enter="checkPwd" class="pwd-input" type="text" placeholder="请输入访问口令">
-        <div class="tip">{{pwdTip}}</div>
-        <button class="pwd-btn" @click="checkPwd">确认</button>
-      </div>
-    </div>
     <div class="bg-wrap">
       <div class="bg-grad"></div>
     </div>
+
     <div class="page">
       <div class="header">
         <div class="badge">✦ 评委控制台 ✦</div>
         <div class="htitle">毓秀杯 · AI打分后台</div>
         <div class="hsub">填写信息并打分，大屏幕实时同步</div>
       </div>
+
       <div class="section">
         <div class="head-title">参赛信息</div>
         <select v-model="form.groupName" @change="autoSave" class="group-select">
@@ -56,7 +50,7 @@
               <text class="sector-label" :x="getTextPosition(3).x" :y="getTextPosition(3).y - 28">角色还原度</text>
             </g>
             <text class="center-small" x="380" y="280">得分</text>
-            <text class="center-total" x="380" y="380">{{ this.total1 }}</text>
+            <text class="center-total" x="380" y="380">{{ displayTotal1 }}</text>
           </svg>
           <div class="stu-name">{{ currentGroup ? currentGroup.value[0] : '' }}</div>
           <div class="sec-title">评分项目(每项0 - 5分)</div>
@@ -104,7 +98,7 @@
               <text class="sector-label" :x="getTextPosition(3).x" :y="getTextPosition(3).y - 28">角色还原度</text>
             </g>
             <text class="center-small" x="380" y="280">得分</text>
-            <text class="center-total" x="380" y="380">{{ this.total2 }}</text>
+            <text class="center-total" x="380" y="380">{{ displayTotal2 }}</text>
           </svg>
           <div class="stu-name">{{ currentGroup ? currentGroup.value[1] : '' }}</div>
           <div class="sec-title">评分范围(每项0~5分)</div>
@@ -154,15 +148,14 @@ export default {
   name: 'Control',
   data() {
     return {
-      passAuth: false, // 是否通过口令校验
-      inputPwd: '',
-      pwdTip: '',
-      pwdCode: '职涯星', // 这里改成你的真实口令
       form: { groupName: '', work: '' },
       scores1: [null, null, null, null],
       scores2: [null, null, null, null],
       statusText: '⚡ 等待打分…',
-      // studentList:[],
+      lastData: null,
+      showScoreList: false,
+      scoreList: [],
+      scoreListOffset: 0,
       groupData: [
         { groupName: '第一组', workName: '花木兰', value: ["南茉","潘虹"] },
         { groupName: '第二组', workName: '魔童闹海', value: ["李蓓"] },
@@ -188,7 +181,10 @@ export default {
         { name: '发音准确度', value: null },
         { name: '角色还原度', value: null },
       ],
-
+      currentPlayerName: '—',
+      playerWork: '—',
+      displayTotal1: '—',
+      displayTotal2: '—',
     }
   },
   computed: {
@@ -227,6 +223,8 @@ export default {
       this.scores2 = [null, null, null, null]
       this.scoreItems1.forEach(item => item.value = null)
       this.scoreItems2.forEach(item => item.value = null)
+      this.displayTotal1 = '—'
+      this.displayTotal2 = '—'
       // 清空作品选择
       if(this.currentGroup){
         this.form.work = this.currentGroup.workName
@@ -235,6 +233,11 @@ export default {
       }
       this.autoSave()
     }
+  },
+  mounted() {
+    this.loadFromLocal()
+    this.displayTotal1 = this.total1
+    this.displayTotal2 = this.total2
   },
   methods: {
     // 左侧选手打分
@@ -249,6 +252,7 @@ export default {
         this.$set(this.scores1, idx, val);
         this.scoreItems1[idx].value = val;
       }
+      this.displayTotal1 = this.total1;
       this.autoSave();
     },
     // 右侧选手打分
@@ -262,6 +266,7 @@ export default {
         this.$set(this.scores2, idx, val);
         this.scoreItems2[idx].value = val;
       }
+      this.displayTotal2 = this.total2;
       this.autoSave();
     },
     autoSave() {
@@ -277,37 +282,26 @@ export default {
         total2: total2,
         ts: Date.now()
       }
-
+      try {
+        localStorage.setItem('yuxiu_data', JSON.stringify(data))
+      } catch (e) {}
     },
     async publish() {
-      const stu1 = {
-        name: this.currentGroup.value[0] || '',
-        groupName: this.form.groupName,
-        work: this.form.work,
-        score1: this.scores1[0],
-        score2: this.scores1[1],
-        score3: this.scores1[2],
-        score4: this.scores1[3],
-        total: this.total1,
-      }
-      const studentList = [stu1]
-      const stu2Name = this.currentGroup.value[1]
-      if (stu2Name) {
-        const stu2 = {
-          name: stu2Name,
+      try {
+        const dto = {
           groupName: this.form.groupName,
           work: this.form.work,
-          score1: this.scores2[0],
-          score2: this.scores2[1],
-          score3: this.scores2[2],
-          score4: this.scores2[3],
-          total: this.total2,
+          // s1_1: this.scores1[0],
+          // s1_2: this.scores1[1],
+          // s1_3: this.scores1[2],
+          // s1_4: this.scores1[3],
+          // s2_1: this.scores2[0],
+          // s2_2: this.scores2[1],
+          // s2_3: this.scores2[2],
+          // s2_4: this.scores2[3],
         }
-        studentList.push(stu2)
-      }
-      console.log('发布到大屏幕的学生列表:', studentList)
-      try {
-        await api.post('/ai/yxb/insert/score', studentList)
+        console.log('dto', dto)
+        await api.post('/ai/yxb/insert/score', dto)
         alert('✅ 发布成功！大屏幕已同步')
         this.statusText = '✅ 已发布到大屏幕'
       } catch (err) {
@@ -317,25 +311,53 @@ export default {
     },
     async resetAll() {
       try {
-        const res = await api.get('/ai/yxb/reset/all')
-        const result = res.data
-        if (result.code === 200) {
-          alert('✅ 重置成功！大屏幕已同步')
-          this.form.groupName = ''
-          this.form.work = ''
-          this.scores1 = [null, null, null, null]
-          this.scores2 = [null, null, null, null]
-          this.scoreItems1.forEach(item => item.value = null)
-          this.scoreItems2.forEach(item => item.value = null)
-          this.total1 = '—'
-          this.total2 = '—'
-          this.statusText = '✅ 已重置'
-        } else {
-          alert('❌ 重置失败')
+        const dto = {
+          groupName: '',
+          work: '',
+          s1_1: null,
+          s1_2: null,
+          s1_3: null,
+          s1_4: null,
+          s2_1: null,
+          s2_2: null,
+          s2_3: null,
+          s2_4: null,
         }
+        await api.post('/ai/yxb/insert/score', dto)
+        this.form.groupName = ''
+        this.form.work = ''
+        // 清空两套分数和扇形数据
+        this.scores1 = [null, null, null, null]
+        this.scores2 = [null, null, null, null]
+        this.scoreItems1.forEach(item => item.value = null)
+        this.scoreItems2.forEach(item => item.value = null)
+        this.displayTotal1 = '—'
+        this.displayTotal2 = '—'
+        localStorage.removeItem('yuxiu_data')
+        alert('✅ 已全部重置')
+        this.statusText = '⚡ 已重置'
       } catch (err) {
         alert('❌ 重置失败')
       }
+    },
+    loadFromLocal() {
+      try {
+        const d = JSON.parse(localStorage.getItem('yuxiu_data') || 'null')
+        if (d) {
+          this.form.groupName = d.groupName || ''
+          this.form.work = d.work || ''
+          if (d.scores1) {
+            this.scores1 = d.scores1.map(item => item === undefined ? null : item)
+            this.scores1.forEach((v, i) => this.scoreItems1[i].value = v)
+          }
+          if (d.scores2) {
+            this.scores2 = d.scores2.map(item => item === undefined ? null : item)
+            this.scores2.forEach((v, i) => this.scoreItems2[i].value = v)
+          }
+          this.displayTotal1 = this.total1
+          this.displayTotal2 = this.total2
+        }
+      } catch (e) {}
     },
     getSectorPath(index) {
       const cx = 380;
@@ -405,15 +427,6 @@ export default {
       const num = Number(value);
       if (!Number.isFinite(num)) return '—';
       return num.toFixed(1);
-    },
-    checkPwd(){
-      if(this.inputPwd === this.pwdCode){
-        this.passAuth = true
-        this.pwdTip = ''
-      }else{
-        this.pwdTip = '❌ 口令错误，请重新输入'
-        this.inputPwd = ''
-      }
     },
   }
 
@@ -655,62 +668,5 @@ select.group-select {
   font-size:100px;
   font-weight:bold;
   text-anchor:middle;
-}
-
-
-/* 口令弹窗样式 */
-.pwd-modal{
-  position: fixed;
-  inset:0;
-  background:rgba(0,0,0,0.85);
-  z-index:9999;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.pwd-box{
-  background:#21172D;
-  border:2px solid #DBA612;
-  border-radius:20px;
-  padding:30px;
-  width:350px;
-  text-align:center;
-}
-.pwd-title{
-  font-size:24px;
-  color:#FEDA45;
-  margin-bottom:20px;
-}
-.pwd-input{
-  width:100%;
-  box-sizing:border-box;
-  height:50px;
-  background:#3F342B;
-  border:1.5px solid #DBA612;
-  border-radius:12px;
-  color:#fff;
-  font-size:20px;
-  padding:0 15px;
-  margin-bottom:12px;
-}
-.tip{
-  height:24px;
-  color:#ff7777;
-  margin-bottom:12px;
-  font-size:20px;
-}
-.pwd-btn{
-  width:100%;
-  height:48px;
-  background:#F3D356;
-  border:none;
-  border-radius:12px;
-  font-size:20px;
-  font-weight:bold;
-  color:#000;
-}
-/* 锁定页面，禁止点击底层内容 */
-.lockPage {
-  pointer-events: none;
 }
 </style>
