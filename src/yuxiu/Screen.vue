@@ -77,12 +77,12 @@
                 <text class="sector-label" :x="getTextPosition(3).x" :y="getTextPosition(3).y - 28">{{ scoreItems[3].name }}</text>
               </g>
               <text class="center-small" x="380" y="280">得分</text>
-              <text class="center-total" x="380" y="380">{{ stu2 && stu2.total || '—' }}分</text>
+              <text class="center-total" x="380" y="380">{{ stu2 && stu2.total || '—' }}</text>
               </svg>
               <div class="radar-player">  {{ stu2 && stu2.name || '—' }}</div>
             </div>
           </div>
-          <div class="avg-score">组别平均分{{this.avgScore || '—'}}分</div>
+          <div class="avg-score">组别平均分 : <span class="avg-score-light">{{ this.avgScore || '—' }}</span></div>
 
           <div class="score-list-button" @click="toggleScoreList">
             <span class="slb-arrow">{{ showScoreList ? '◀' : '▼' }}</span>
@@ -93,19 +93,25 @@
             <div class="sl-header">🏆 选手得分榜</div>
             <div class="sl-header-tip">评分实时更新，综合得分排行</div>
             <div class="sl-header-row">
-              <span class="sl-rank sl-header-item">排名</span>
-              <span class="sl-name sl-header-item">队伍</span>
+              <span class="sl-rank-header sl-header-item">排名</span>
+              <span class="sl-name sl-header-item">选手</span>
               <span class="sl-score sl-header-item">专家评委组得分</span>
               <span class="sl-score sl-header-item">大众评委组得分</span>
               <span class="sl-avg-score sl-header-item">综合得分</span>
             </div>
             <div class="sl-body">
               <div class="sl-row" v-for="(item, i) in visibleScoreList" :key="scoreListOffset + i">
-                <span class="sl-rank" :class="'top-' + (scoreListOffset + i + 1)">{{ scoreListOffset + i + 1 }}</span>
+                <!-- <span class="sl-rank" :class="'top-' + item.realRank">{{ item.realRank <=3 ? '🏆'+item.realRank : item.realRank }}</span>                 -->
+                <span class="sl-rank">
+                  <span class="medal" v-if="item.realRank === 1">🥇</span>
+                  <span class="medal" v-else-if="item.realRank === 2">🥈</span>
+                  <span class="medal" v-else-if="item.realRank === 3">🥉</span>
+                  <span v-else>{{ item.realRank }}</span>
+                </span>
                 <span class="sl-name">{{ item.name }}</span>
-                <span class="sl-score">{{ item.expertScore === -1 ? '未打分' : item.expertScore }}</span>
-                <span class="sl-score">{{ item.volkswagenScore === -1 ? '未打分' : item.volkswagenScore }}</span>
-                <span class="sl-avg-score">{{ item.endScore === -1 ? '待统计' : item.endScore }}</span>
+                <span class="sl-score">{{ item.expertEndScore === null ? '待统计' : item.expertEndScore }}</span>
+                <span class="sl-score">{{ item.volkswagenEndScore === null ? '待统计' : item.volkswagenEndScore }}</span>
+                <span class="sl-avg-score">{{ item.endScore === null ? '-' : item.endScore }}</span>
               </div>
             </div>
           </div>
@@ -154,6 +160,7 @@ export default {
   },
   computed: {
     visibleScoreList() {
+      console.log(this.scoreList);
       return this.scoreList.slice(this.scoreListOffset, this.scoreListOffset + 6);
     },
   },
@@ -229,10 +236,16 @@ export default {
           });
           // 按分数从高到低排序，未打分(-1)放最后
           this.scoreList = filtered.sort((a, b) => {
-            const sa = a.endScore === -1 ? -999 : a.endScore;
-            const sb = b.endScore === -1 ? -999 : b.endScore;
-            return sb - sa;
-          });
+          const sa = a.endScore === -1 ? -999 : a.endScore;
+          const sb = b.endScore === -1 ? -999 : b.endScore;
+          return sb - sa;
+        }).map((item, realIndex)=>{
+          // realIndex 是全局真实下标，从0开始，真实排名=realIndex+1
+          return {
+            ...item,
+            realRank: realIndex + 1
+          }
+        });
           this.scoreListOffset = 0;
         }
       } catch (e) {}
@@ -610,13 +623,23 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
 }
 .avg-score {
   position: relative;
-  top: -100px;
+  top: -120px;
   text-align: center;
   font-family: "STKaiti", "KaiTi", serif;
   font-size: 50px;
   font-weight: 900;
   color: #FDD93D;
 }
+
+.avg-score-light{
+  color: #FEE175;
+  fill: #FDE175;
+  font-size: 60px;
+  font-weight: 900;
+  text-anchor: middle;
+  filter: drop-shadow(0 0 12px rgba(240, 210, 122, .55));
+}
+
 /* 排行榜按钮 */
 .score-list-button {
   position: relative;
@@ -650,12 +673,12 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
 }
 .score-list {
   position: relative;
-  top: -1120px;
+  top: -1130px;
   width: 1278px;
-  height: 777px;
+  height: 765px;
   background: #21192C;
   border: 2px solid #DBA612;
-  border-radius: 20px;
+  border-radius: 25px;
   z-index: 20;
   padding: 36px 48px 40px;
   box-shadow: 0 16px 60px rgba(0,0,0,.6);
@@ -665,7 +688,8 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
   font-size: 38px;
   font-weight: 750;
   letter-spacing: 5px;
-  margin-bottom: 5px;
+  margin-top: -15px;
+  margin-bottom: 10px;
   text-align: center;
   color: #FDE175;
 }
@@ -673,7 +697,7 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
   font-size: 20px;
   font-weight: 100;
   letter-spacing:1px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   text-align: center;
   color: #ACAAAE;
 }
@@ -683,7 +707,7 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
   flex-direction: column;
   background-image: linear-gradient(#fff, #fff);
   background-repeat: repeat-y;
-  background-position: 150px 0;
+  background-position: 160px 0;
   background-size: 1px 100%;
 }
 .sl-row {
@@ -703,8 +727,25 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 45px;
+  font-size: 40px;
   font-weight: 700;
+}
+.medal {
+  transform: scale(1.5);
+  display: inline-block;
+}
+/* 金银铜颜色 */
+.medal:nth-child(1) {
+  color: #FFD700;
+}
+.medal:nth-child(2) {
+  color: #C0C0C0;
+}
+.medal:nth-child(3) {
+  color: #CD7F32;
+}
+.sl-rank-header{
+  margin-left: 50px;
 }
 .sl-name {
   width: 300px;
@@ -731,7 +772,7 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
   text-align: center;
   background-image: linear-gradient(#fff, #fff);
   background-repeat: repeat-y;
-  background-position: 150px 0;
+  background-position: 160px 0;
   background-size: 1px 100%;
 }
 .sl-header-item {

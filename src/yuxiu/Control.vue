@@ -13,7 +13,7 @@
     </div>
     <div class="page">
       <div class="header">
-        <div class="badge">✦ 评委控制台 ✦</div>
+        <div class="badge">✦ 大屏控制台 ✦</div>
         <div class="htitle">毓秀杯 · AI打分后台</div>
         <div class="hsub">填写信息并打分，大屏幕实时同步</div>
       </div>
