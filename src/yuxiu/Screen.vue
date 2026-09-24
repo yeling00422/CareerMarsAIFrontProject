@@ -2,6 +2,16 @@
   <div class="screen-cover yuxiucup-screen">
     <div class="screen-bg"></div>
     <div class="screen-page" ref="page">
+      <!-- 右侧二维码区域 -->
+      <div class="qr-section" v-show="!showScoreList && !showVoteList">
+        <p class="qr-text">
+          <span class="iconfont icon-weixin"></span>微信扫码参与互动
+        </p>
+        <div class="qr-code" id="wxBoxReg">
+          <div class="qr-placeholder">二维码</div>
+        </div>
+
+      </div>
       <div class="header">
         <div class="badge">毓秀杯电影配音交流赛 · 第二期 </div>
         <div class="title"><span class="title-line-left">———</span>以声会友 · 声深入心<span class="title-line-right">———</span></div>
@@ -84,24 +94,29 @@
           </div>
           <div class="avg-score">组别平均分 : <span class="avg-score-light">{{ this.avgScore || '—' }}</span></div>
 
-          <div class="score-list-button" @click="toggleScoreList">
-            <span class="slb-arrow">{{ showScoreList ? '◀' : '▼' }}</span>
-            <span class="slb-label">排行榜</span>
+          <div class="btn-wrap">
+            <div class="score-list-button" @click="toggleScoreList" :class="{btnDisabled: showVoteList}">
+              <span class="slb-arrow">{{ showScoreList ? '◀' : '▼' }}</span>
+              <span class="slb-label">排行榜</span>
+            </div>
+            <div class="vote-list-button" @click="toggleVoteList" :class="{btnDisabled: showScoreList}">
+              <span class="slb-arrow">{{ showVoteList ? '◀' : '▼' }}</span>
+              <span class="slb-label">人气榜</span>
+            </div>
           </div>
 
           <div class="score-list" v-show="showScoreList">
             <div class="sl-header">🏆 选手得分榜</div>
             <div class="sl-header-tip">评分实时更新，综合得分排行</div>
             <div class="sl-header-row">
-              <span class="sl-rank-header sl-header-item">排名</span>
-              <span class="sl-name sl-header-item">选手</span>
-              <span class="sl-score sl-header-item">专家评委组得分</span>
-              <span class="sl-score sl-header-item">大众评委组得分</span>
-              <span class="sl-avg-score sl-header-item">综合得分</span>
+              <span class="sl-rank-head">排名</span>
+              <span class="sl-name-head">选手</span>
+              <span class="sl-score-head">专家评委组得分</span>
+              <span class="sl-score-head">大众评委组得分</span>
+              <span class="sl-avg-score-head">综合得分</span>
             </div>
             <div class="sl-body">
               <div class="sl-row" v-for="(item, i) in visibleScoreList" :key="scoreListOffset + i">
-                <!-- <span class="sl-rank" :class="'top-' + item.realRank">{{ item.realRank <=3 ? '🏆'+item.realRank : item.realRank }}</span>                 -->
                 <span class="sl-rank">
                   <span class="medal" v-if="item.realRank === 1">🥇</span>
                   <span class="medal" v-else-if="item.realRank === 2">🥈</span>
@@ -115,6 +130,33 @@
               </div>
             </div>
           </div>
+
+          <div class="vote-list" v-show="showVoteList">
+            <div class="vote-header">🏆 选手人气榜</div>
+            <div class="vote-header-tip">评分实时更新，综合得分排行</div>
+            <div class="vote-header-row">
+              <span class="vote-rank-header">排名</span>
+              <span class="vote-group-name-head">组别</span>
+              <span class="vote-long-text-head">选手</span>
+              <span class="vote-long-text-head">作品</span>
+              <span class="vote-number-head">票数</span>
+            </div>
+            <div class="vote-body">
+              <div class="vote-row" v-for="(item, i) in visibleVoteList" :key="voteListOffset + i">
+                <span class="vote-rank">
+                  <span class="medal" v-if="item.realRank === 1">🥇</span>
+                  <span class="medal" v-else-if="item.realRank === 2">🥈</span>
+                  <span class="medal" v-else-if="item.realRank === 3">🥉</span>
+                  <span v-else>{{ item.realRank }}</span>
+                </span>
+                <span class="vote-group-name">{{ item.groupName }}</span>
+                <span class="vote-long-text">{{ item.name }}</span>
+                <span class="vote-long-text">《{{ item.work }}》</span>
+                <span class="vote-number">{{ item.voteNumber }}</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -123,7 +165,7 @@
 
 <script>
 import axios from 'axios';
-import { getAiURL } from '@/utils/index';
+import { getAiURL,getVXAppId,getYXBUrl } from '@/utils/index';
 const api = axios.create({ baseURL: getAiURL(), headers: { 'Content-Type': 'application/json' } });
 const FIELDS = ['score1', 'score2', 'score3', 'score4'];
 const SPEECH = [
@@ -145,8 +187,11 @@ export default {
     return {
       lastData: null,
       showScoreList: false,
+      showVoteList: false,
       scoreList: [],
+      voteList: [],
       scoreListOffset: 0,
+      voteListOffset: 0,
       scoreItems: [
         { name: '难度系数', value: null },
         { name: '作品完成率', value: null },
@@ -163,6 +208,9 @@ export default {
       console.log(this.scoreList);
       return this.scoreList.slice(this.scoreListOffset, this.scoreListOffset + 6);
     },
+    visibleVoteList() {
+      return this.voteList.slice(this.voteListOffset, this.voteListOffset + 6);
+    },
   },
   mounted() {
     document.body.classList.add('has-yuxiucup-screen')
@@ -170,8 +218,47 @@ export default {
     window.addEventListener('resize', this.scaleScreen);
     this.startPoll();
     this.startIdleSpeech();
+    const css = `
+      .impowerBox {
+        width:300px !important;
+        height:300px !important;
+        overflow:hidden !important;
+        position:relative !important;
+      }
+      .impowerBox .qrcode{
+        width: 300px !important;
+        height: 300px !important;
+        position: relative !important;
+        top: -48px !important;
+      }
+      .impowerBox .qlogin_btn,
+      .impowerBox .web_qrcode_tip,
+      .impowerBox .web_qrcode_switch {
+        display:none !important;
+      }
+    `
+    this.wxLoginNew('wxBoxReg', css)
   },
   methods: {
+    wxLoginNew(id, css) {
+      if(window.WxLogin) return;
+      const s = document.createElement('script')
+      s.type = 'text/javascript'
+      s.src = 'https://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js'
+      s.onload = () => {
+        const base64Css = `data:text/css;base64,${btoa(unescape(encodeURIComponent(css)))}`
+        var obj = new WxLogin({
+          id,
+          appid: getVXAppId(),
+          scope: 'snsapi_login',
+          redirect_uri: encodeURIComponent(getYXBUrl()),
+          state: Math.random(),
+          style: 'white',
+          href: base64Css
+        })
+      }
+      document.body.appendChild(s)
+    },
     scaleScreen() {
       const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
       const el = this.$refs.page;
@@ -230,23 +317,39 @@ export default {
       try {
         const { data } = await api.get('/ai/yxb/search/endScore');
         if (Array.isArray(data.data)) {
-          // 过滤：两个都为 -1 才不显示
           const filtered = data.data.filter(item => {
             return !(item.expertScore === -1 && item.volkswagenScore === -1);
           });
-          // 按分数从高到低排序，未打分(-1)放最后
           this.scoreList = filtered.sort((a, b) => {
           const sa = a.endScore === -1 ? -999 : a.endScore;
           const sb = b.endScore === -1 ? -999 : b.endScore;
           return sb - sa;
         }).map((item, realIndex)=>{
-          // realIndex 是全局真实下标，从0开始，真实排名=realIndex+1
           return {
             ...item,
             realRank: realIndex + 1
           }
         });
           this.scoreListOffset = 0;
+        }
+      } catch (e) {}
+    },
+    async fetchVoteList() {
+      try {
+        const { data } = await api.get('/ai/yxb/current/vote');
+        if (Array.isArray(data.data)) {
+          const filtered = data.data; // 补上这一行
+          this.voteList = filtered.sort((a, b) => {
+            const sa = a.voteNumber === -1 ? -999 : a.voteNumber;
+            const sb = b.voteNumber === -1 ? -999 : b.voteNumber;
+            return sb - sa;
+          }).map((item, realIndex)=>{
+            return {
+              ...item,
+              realRank: realIndex + 1
+            }
+          });
+          this.voteListOffset = 0;
         }
       } catch (e) {}
     },
@@ -268,6 +371,14 @@ export default {
       }, 7000);
     },
     toggleScoreList() {
+      // 互斥：打开得分榜，关闭人气榜
+      if(!this.showScoreList){
+        this.showVoteList = false;
+        if (this._voteListTimer) {
+          clearInterval(this._voteListTimer);
+          this._voteListTimer = null;
+        }
+      }
       this.showScoreList = !this.showScoreList;
       if (this.showScoreList) {
         this.fetchScoreList();
@@ -279,11 +390,30 @@ export default {
         }
       }
     },
-    startScoreListCycle() {
-      if (this._scoreListTimer) clearInterval(this._scoreListTimer);
-      this._scoreListTimer = setInterval(() => {
-        const next = this.scoreListOffset + 6;
-        this.scoreListOffset = next >= this.scoreList.length ? 0 : next;
+    toggleVoteList() {
+      if(!this.showVoteList){
+        this.showScoreList = false;
+        if (this._scoreListTimer) {
+          clearInterval(this._scoreListTimer);
+          this._scoreListTimer = null;
+        }
+      }
+      this.showVoteList = !this.showVoteList;
+      if (this.showVoteList) {
+        this.fetchVoteList();
+        this.startVoteListCycle();
+      } else {
+        if (this._voteListTimer) {
+          clearInterval(this._voteListTimer);
+          this._voteListTimer = null;
+        }
+      }
+    },
+    startVoteListCycle() {
+      if (this._voteListTimer) clearInterval(this._voteListTimer);
+      this._voteListTimer = setInterval(() => {
+        const next = this.voteListOffset + 6;
+        this.voteListOffset = next >= this.voteList.length ? 0 : next;
       }, 10000);
     },
     getSectorPath(index) {
@@ -293,7 +423,6 @@ export default {
       const innerR = 220;
       const gap = 3;
       const sectorAngle = (180 - gap * 3) / 4;
-      // 从左边 180° 开始，向右走
       const startAngle = 180 - index * (sectorAngle + gap);
       const endAngle = startAngle - sectorAngle;
       const toPoint = (radius, angle) => {
@@ -319,7 +448,6 @@ export default {
       const innerR = 220;
       const gap = 3;
       const sectorAngle = (180 - gap * 3) / 4;
-      // 限制在 0 ~ 5
       const ratio = Math.max(0, Math.min(score, 5)) / 5;
       const startAngle = 180 - index * (sectorAngle + gap);
       const endAngle = startAngle - sectorAngle * ratio;
@@ -398,7 +526,13 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
 .b1 { width: 700px; height: 700px; top: -200px; left: -150px; background: rgba(168,85,247,.2); }
 .b2 { width: 600px; height: 600px; bottom: -180px; right: -120px; background: rgba(255,143,171,.16); }
 /* 标题 */
-.header { position: relative; z-index: 1; text-align: center; padding: 28px 0 14px; }
+.header { 
+  position: relative; 
+  z-index: 1; 
+  text-align: center; 
+  /* margin-left: 500px; */
+  padding: 28px 0 14px; 
+}
 .badge {
   position: relative;
   margin-top:-25px;
@@ -482,7 +616,9 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
   margin-left: -20px;
 }
 .player-card {
-  height: 130px; flex-shrink: 0;
+  height: 130px; 
+  width: 950px;
+  flex-shrink: 0;
   background: #21192C;
   border: 2px solid #DBA612;
   border-radius: 24px;
@@ -639,31 +775,53 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
   text-anchor: middle;
   filter: drop-shadow(0 0 12px rgba(240, 210, 122, .55));
 }
+.btn-wrap{
+  position: absolute;
+  right: -40px;
+  top: 250px;
+  z-index: 100;
+}
 
-/* 排行榜按钮 */
 .score-list-button {
-  position: relative;
-  right: -1382px;
-  top: -600px;
   width: 35px;
-  height: 200px;
+  height: 150px;
   background: #FEDB4B;
   border: 1px solid rgba(168,85,247,.6);
   border-radius: 14px 0 0 14px;
-  z-index: 100;
-  cursor: pointer;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background .2s, box-shadow .2s;
   user-select: none;
 }
+
+.vote-list-button {
+  width: 35px;
+  height: 150px;
+  background: #FEDB4B;
+  border: 1px solid rgba(168,85,247,.6);
+  border-radius: 14px 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  user-select: none;
+  margin-top: 50px;
+}
+
+.btnDisabled{
+  opacity:0.35;
+  pointer-events:none; /* 禁用点击 */
+}
+
 .slb-arrow {
   font-size: 20px;
   color:#05060A;
 }
+
 .slb-label {
   writing-mode: vertical-rl;
   font-size: 20px;
@@ -671,9 +829,11 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
   color: #05060A;
   font-weight: 900;
 }
+
 .score-list {
-  position: relative;
-  top: -1130px;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 1278px;
   height: 765px;
   background: #21192C;
@@ -744,8 +904,23 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
 .medal:nth-child(3) {
   color: #CD7F32;
 }
-.sl-rank-header{
+.sl-rank-head{
   margin-left: 50px;
+}
+.sl-name-head {
+  width: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sl-score-head {
+  width: 300px;
+}
+.sl-avg-score-head{
+  width: 200px;
+  text-align: center;
+  color: #FDE076;
+  font-weight: 750;
 }
 .sl-name {
   width: 300px;
@@ -768,14 +943,21 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
   background: #40342B;
   border-top: 2px solid #fff;
   display: flex;
+  height: 50px;
+  align-items: center;
   padding: 20px 16px;
   text-align: center;
   background-image: linear-gradient(#fff, #fff);
   background-repeat: repeat-y;
   background-position: 160px 0;
   background-size: 1px 100%;
+    color: #F4DE8D;
+  font-weight: bold;
+  font-size: 30px;
 }
-.sl-header-item {
+
+
+.vl-header-item {
   color: #F4DE8D;
   font-weight: bold;
   font-size: 30px;
@@ -787,4 +969,154 @@ body.has-yuxiucup-screen .logo,
 body.has-yuxiucup-screen .particles {
   display: none !important;
 }
+
+
+
+
+/* 人气榜容器 */
+.vote-list {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1278px;
+  min-height: 785px;
+  background: #21192C;
+  border: 2px solid #DBA612;
+  border-radius: 25px;
+  z-index: 20;
+  padding: 36px 48px 0px;
+  box-shadow: 0 16px 60px rgba(0,0,0,.6);
+    z-index: 100;
+
+}
+
+.vote-header {
+  font-family: "STKaiti","KaiTi",serif;
+  font-size: 38px;
+  font-weight: 750;
+  letter-spacing: 5px;
+  margin-top: -15px;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #FDE175;
+}
+.vote-header-tip{
+  font-size: 20px;
+  font-weight: 100;
+  letter-spacing:1px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #ACAAAE;
+}
+
+.vote-header-row {
+  background: #40342B;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  border-top: 2px solid #fff;
+  display: flex;
+  padding: 20px 16px;
+  text-align: center;
+  background-image: linear-gradient(#fff, #fff);
+  background-repeat: repeat-y;
+  background-position: 160px 0;
+  background-size: 1px 100%;
+}
+.vote-header-row {
+  color: #F4DE8D;
+  font-weight: bold;
+  font-size: 30px;
+}
+.vote-rank-header{
+  margin-left: 50px;
+}
+
+/* 人气榜行 */
+.vote-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-image: linear-gradient(#fff, #fff);
+  background-repeat: repeat-y;
+  background-position: 160px 0;
+  background-size: 1px 100%;
+}
+.vote-row {
+  display: flex;
+  padding: 20px 16px;
+  font-size: 32px;
+  font-weight: 100;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(90deg, #fff 0 15px, transparent 0 15px);
+  background-size: 30px 1px;
+  background-repeat: repeat-x;
+}
+
+.vote-rank {
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  font-weight: 700;
+}
+
+.vote-group-name-head{
+  width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vote-group-name {
+  width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vote-long-text {
+  width: 400px;
+  margin-right: -10px;
+}
+
+.vote-long-text-head{
+  width: 400px;
+
+}
+.vote-number-head{
+  width: 100px;
+  text-align: center;
+  color: #FDE076;
+  font-weight: 750;
+}
+
+.vote-number{
+  width: 100px;
+  text-align: center;
+  font-size: 45px;
+  color: #FDE076;
+  font-weight: 750;
+}
+
+.qr-section {
+  position: absolute;
+  top: 10px;
+  right: 150px;
+  z-index: 9;
+  text-align:center;
+}
+.qr-code {
+  width:300px;
+  height:300px;
+  overflow:hidden;
+  margin-top: -10px;
+}
+.qr-text {
+  color:#FDE076;
+  font-size:28px;
+  margin-top:20px;
+}
+
 </style>

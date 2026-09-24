@@ -42,4 +42,27 @@ export function getBaseUrl() {
   }
 }
 
+export function getVXAppId() {
+  const hostname = window.location.hostname
+  if (hostname === 'localhost') {
+    return 'wxa0558fc231cb79d0'
+  } else if (hostname === 'www.careermars-test.cn') {
+    return 'wxa0558fc231cb79d0'
+  } else {
+    return 'wx3ac13a15b8fd070e'
+  }
+}
+
+export function getYXBUrl() {
+  const hostname = window.location.hostname
+  if (hostname === 'localhost') {
+    // 本地开发，微信不会回调localhost，这里仅占位
+    return 'https://www.careermars.cn/ai/user-login'
+  } else if (hostname === 'www.careermars-test.cn') {
+    return 'https://www.careermars-test.cn/ai/user-login'
+  } else {
+    return 'https://www.careermars.cn/ai/user-login'
+  }
+}
+
 
