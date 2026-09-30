@@ -2,19 +2,34 @@
   <div class="screen-cover yuxiucup-screen">
     <div class="screen-bg"></div>
     <div class="screen-page" ref="page">
+    <!-- 弹幕容器 -->
+    <div class="danmu-container" ref="danmuContainer">
+      <div
+        class="danmu-item"
+        v-for="item in danmuList"
+        :key="item.id"
+        :style="item.style"
+      >
+        {{ item.context }}
+      </div>
+    </div>
       <!-- 右侧二维码区域 -->
       <div class="qr-section" v-show="!showScoreList && !showVoteList">
         <p class="qr-text">
           <span class="iconfont icon-weixin"></span>微信扫码参与互动
         </p>
-        <div class="qr-code" id="wxBoxReg">
-          <div class="qr-placeholder">二维码</div>
-        </div>
+      <div class="qr-code">
+        <canvas ref="qrCanvas"></canvas>
+      </div>
 
       </div>
       <div class="header">
         <div class="badge">毓秀杯电影配音交流赛 · 第二期 </div>
         <div class="title"><span class="title-line-left">———</span>以声会友 · 声深入心<span class="title-line-right">———</span></div>
+        <button class="danmu-btn" @click="changeDanmuSwitch">
+          <span v-if="danmuSwitch">弹幕：开启</span>
+          <span v-else>弹幕：关闭</span>
+        </button>
       </div>
       <div class="main">
         <div class="char-col">
@@ -156,7 +171,6 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -165,9 +179,9 @@
 
 <script>
 import axios from 'axios';
-import { getAiURL,getVXAppId,getYXBUrl } from '@/utils/index';
+import QRCode from 'qrcode';
+import { getAiURL } from '@/utils/index';
 const api = axios.create({ baseURL: getAiURL(), headers: { 'Content-Type': 'application/json' } });
-const FIELDS = ['score1', 'score2', 'score3', 'score4'];
 const SPEECH = [
   [18, '哇哦！！满星级别。小水滴超级感动！🌟✨🎉'],
   [15, '太棒了！这位选手实力超强！👏💫'],
@@ -201,6 +215,10 @@ export default {
       stu1:null,
       stu2:null,
       avgScore: null,
+      lastDanmuId: null, // 上次弹幕最大id，增量拉取
+      danmuSwitch: false, // 弹幕开关
+      danmuList: [],     // 屏幕上正在展示的弹幕
+      danmuPool: [],     // 待播放弹幕队列
     };
   },
   computed: {
@@ -212,52 +230,94 @@ export default {
       return this.voteList.slice(this.voteListOffset, this.voteListOffset + 6);
     },
   },
+  beforeDestroy(){
+    clearInterval(this._danmuFetchTimer)
+    clearInterval(this._danmuPlayTimer)
+    clearInterval(this._scoreTimer)
+    clearInterval(this._scoreListSyncTimer)
+    clearInterval(this._idleSpeechTimer)
+    if(this._scoreListTimer) clearInterval(this._scoreListTimer)
+    if(this._voteListTimer) clearInterval(this._voteListTimer)
+    window.removeEventListener('resize', this.scaleScreen)
+  },
   mounted() {
     document.body.classList.add('has-yuxiucup-screen')
     this.scaleScreen();
     window.addEventListener('resize', this.scaleScreen);
     this.startPoll();
     this.startIdleSpeech();
-    const css = `
-      .impowerBox {
-        width:300px !important;
-        height:300px !important;
-        overflow:hidden !important;
-        position:relative !important;
-      }
-      .impowerBox .qrcode{
-        width: 300px !important;
-        height: 300px !important;
-        position: relative !important;
-        top: -48px !important;
-      }
-      .impowerBox .qlogin_btn,
-      .impowerBox .web_qrcode_tip,
-      .impowerBox .web_qrcode_switch {
-        display:none !important;
-      }
-    `
-    this.wxLoginNew('wxBoxReg', css)
+    this.createQrCode();
+
+    this.fetchDanmu()
+    // 每10秒拉取一次新弹幕
+    this._danmuFetchTimer = setInterval(()=>{
+      this.fetchDanmu()
+    },10000)
+    // 每500ms播放一条弹幕，控制弹幕密度
+    this._danmuPlayTimer = setInterval(()=>{
+      this.playDanmu()
+    },500)
   },
   methods: {
-    wxLoginNew(id, css) {
-      if(window.WxLogin) return;
-      const s = document.createElement('script')
-      s.type = 'text/javascript'
-      s.src = 'https://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js'
-      s.onload = () => {
-        const base64Css = `data:text/css;base64,${btoa(unescape(encodeURIComponent(css)))}`
-        var obj = new WxLogin({
-          id,
-          appid: getVXAppId(),
-          scope: 'snsapi_login',
-          redirect_uri: encodeURIComponent(getYXBUrl()),
-          state: Math.random(),
-          style: 'white',
-          href: base64Css
-        })
+    // 拉取弹幕接口
+    async fetchDanmu() {
+      if(!this.danmuSwitch){
+        return
       }
-      document.body.appendChild(s)
+      try {
+        const params = this.lastDanmuId ? `?lastId=${this.lastDanmuId}` : ''
+        const {data} = await api.get(`/ai/yxb/current/danmu${params}`)
+        if(data.code === 200 && Array.isArray(data.data) && data.data.length>0){
+          const list = data.data
+          this.lastDanmuId = list[list.length-1].id
+          this.danmuPool.push(...list)
+        }
+      }catch(e){
+        console.error("弹幕拉取失败",e)
+      }
+    },
+
+    playDanmu() {
+      if(this.danmuPool.length === 0) return;
+      const dan = this.danmuPool.shift()
+      const top = Math.random() * 70 + 5; 
+      const duration = 8 + Math.random()*4
+      const danItem = {
+        ...dan,
+        style:{
+          top: `${top}%`,
+          animationDuration: `${duration}s`
+        }
+      }
+      this.danmuList.push(danItem)
+      setTimeout(()=>{
+        const idx = this.danmuList.findIndex(d=>d.id === danItem.id)
+        if(idx > -1) this.danmuList.splice(idx,1)
+      }, duration*1000)
+    },
+
+    async createQrCode() {
+      try {
+        const route = this.$router.resolve({
+          name: 'User',
+        });
+        const loginUrl = new URL(
+          route.href,
+          window.location.origin
+        ).toString();
+        console.log('手机扫码登录地址：', loginUrl);
+        await QRCode.toCanvas(
+          this.$refs.qrCanvas,
+          loginUrl,
+          {
+            width: 300,
+            margin: 2,
+            errorCorrectionLevel: 'H'
+          }
+        );
+      } catch (error) {
+        console.error('生成二维码失败：', error);
+      }
     },
     scaleScreen() {
       const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
@@ -485,6 +545,13 @@ export default {
       if (!Number.isFinite(num)) return '—';
       return num.toFixed(1);
     },
+    changeDanmuSwitch() {
+      if(this.danmuSwitch){
+          this.danmuSwitch = false
+      }else{
+          this.danmuSwitch = true
+      }
+    }
   },
 };
 </script>
@@ -586,11 +653,15 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
   margin-left: -90px;
 }
 .char-name {
+  display: flex;
   font-family: "STKaiti","KaiTi",serif;
   font-size: 26px;
   font-weight: 900;
   margin:0 auto;
-  width: 280px;
+  width: 250px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
   border-radius: 20px;
   margin-bottom: 25px;
   color:#050609;
@@ -788,13 +859,13 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
   background: #FEDB4B;
   border: 1px solid rgba(168,85,247,.6);
   border-radius: 14px 0 0 14px;
-
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 8px;
   user-select: none;
+  cursor: pointer;
 }
 
 .vote-list-button {
@@ -810,6 +881,7 @@ canvas#stars { position: absolute; inset: 0; z-index: 0; }
   gap: 8px;
   user-select: none;
   margin-top: 50px;
+  cursor: pointer;
 }
 
 .btnDisabled{
@@ -1108,10 +1180,18 @@ body.has-yuxiucup-screen .particles {
   text-align:center;
 }
 .qr-code {
-  width:300px;
-  height:300px;
-  overflow:hidden;
-  margin-top: -10px;
+  width: 300px;
+  height: 300px;
+  margin: -10px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-code canvas {
+  width: 300px !important;
+  height: 300px !important;
+  display: block;
 }
 .qr-text {
   color:#FDE076;
@@ -1119,4 +1199,61 @@ body.has-yuxiucup-screen .particles {
   margin-top:20px;
 }
 
+
+/* 弹幕容器 */
+.danmu-container{
+  position: absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  z-index: 100; 
+  pointer-events: none;
+}
+.danmu-item{
+  position: absolute;
+  white-space: nowrap;
+  font-size: 75px;
+  color:#fff;
+  text-shadow: 1px 1px 3px #000, -1px -1px 3px #000;
+  will-change: transform;
+  animation: danmuMove linear forwards;
+  right: -400px;
+}
+@keyframes danmuMove {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-2400px);
+  }
+}
+
+.danmu-btn {
+  position: absolute;
+  right: 500px;
+  top: 110px;
+  font-size: 26px;
+  font-family: "STKaiti","KaiTi",serif;
+  padding: 12px 28px;
+  border-radius: 50px;
+  border: 2px solid #DBA612;
+  background: rgba(33,25,46,0.85);
+  color: #FDE175;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.danmu-btn:hover {
+  background: #DBA612;
+  color: #21192E;
+}
+
+.danmu-btn span {
+  position:relative;
+}
+.danmu-btn:active {
+  transform: scale(0.96);
+}
 </style>

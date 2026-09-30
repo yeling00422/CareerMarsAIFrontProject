@@ -22,7 +22,6 @@ import Screen from '../yuxiu/Screen.vue'
 import Control from '../yuxiu/Control.vue'
 import EndScore from '../yuxiu/EndScore.vue'
 import User from '../yuxiu/User.vue'
-import UserLogin from '../yuxiu/UserLogin.vue'
 
 Vue.use(VueRouter)
 
@@ -50,7 +49,6 @@ const routes = [
   { path: '/control', component: Control },
   { path: '/end-score', component: EndScore },
   { path: '/user', name: 'User',component: User },
-  { path: '/user-login', component: UserLogin },
 ]
 
 const router = new VueRouter({
